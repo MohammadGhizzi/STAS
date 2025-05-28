@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة تقييم الأعراض الأولية</title> <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hidden-section { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            button, #disclaimer-box { display: none; } /* Hide buttons and disclaimer box in print */
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px #3b82f6;
+            border-color: #3b82f6;
+        }
+        label, legend { font-size: 1.1rem; }
+        input, select, button, textarea {
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+        }
+        button { transition: background-color 0.2s ease-in-out; }
+        /* CTAS Level Colors */
+        .ctas-level-1 { color: #dc2626; } /* Red-600 */
+        .ctas-level-2 { color: #f97316; } /* Orange-600 */
+        .ctas-level-3 { color: #f59e0b; } /* Amber-500 */
+        .ctas-level-4 { color: #16a34a; } /* Green-600 */
+        .ctas-level-5 { color: #3b82f6; } /* Blue-500 */
+        .ctas-default { color: #4b5563; } /* Gray-600 */
+        /* Ensure range thumb is visible */
+        input[type=range]::-webkit-slider-thumb { appearance: auto; }
+        input[type=range]::-moz-range-thumb { appearance: auto; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <div class="container mx-auto p-4 md:p-8 max-w-3xl bg-white shadow-lg rounded-lg mt-10 mb-10">
+
+        {/* VERY IMPORTANT DISCLAIMER */}
+        <div id="disclaimer-box" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-8 rounded-md shadow" role="alert">
+            <p class="font-bold text-xl"><i class="fas fa-exclamation-triangle mr-2"></i> تنبيه هام جداً (Very Important Warning)</p>
+            <p class="mt-2 text-lg">هذه الأداة **لا تغني** عن استشارة الطبيب أو الاتصال بالطوارئ.</p>
+            <p class="mt-1 text-lg">This tool **does NOT replace** professional medical advice or calling emergency services.</p>
+            <p class="mt-3 font-semibold text-lg">إذا كنت تعتقد أنك في حالة طوارئ طبية، اتصل فوراً برقم <span class="font-bold text-xl">997</span> (أو رقم الطوارئ المحلي).</p>
+            <p class="mt-1 font-semibold text-lg">If you think you have a medical emergency, CALL <span class="font-bold text-xl">997</span> (or your local emergency number) IMMEDIATELY.</p>
+            <p class="mt-2 text-md">هذه الأداة تقدم تقديراً أولياً فقط بناءً على المعلومات المدخلة وهي ليست تشخيصاً.</p>
+            <p class="mt-1 text-md">This tool provides only a preliminary estimate based on the information entered and is not a diagnosis.</p>
+        </div>
+
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-4">أداة تقييم الأعراض الأولية</h1>
+        <h2 class="text-xl text-center text-gray-600 mb-8">Preliminary Symptom Assessment Tool</h2>
+
+        <form id="symptom-form">
+
+            {/* Step 1: Basic Information */}
+            <section id="step-1" class="step-section border-b pb-8 mb-8">
+                <h3 class="text-2xl font-semibold mb-6 text-gray-700 border-r-4 border-blue-500 pr-4">الخطوة 1: معلومات أساسية</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="patient-age" class="block text-gray-700 font-medium mb-2">كم عمرك؟ (Your Age):</label>
+                        <input type="number" id="patient-age" name="patient_age" min="0" required class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="patient-gender" class="block text-gray-700 font-medium mb-2">الجنس (Gender):</label>
+                        <select id="patient-gender" name="patient_gender" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">اختر (Select)</option>
+                            <option value="male">ذكر (Male)</option>
+                            <option value="female">أنثى (Female)</option>
+                            <option value="prefer_not_say">أفضل عدم القول (Prefer not to say)</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="has-diabetes" class="block text-gray-700 font-medium mb-2">هل تعاني من مرض السكري؟ (Do you have diabetes?)</label>
+                        <select id="has-diabetes" name="has_diabetes" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                            <option value="no">لا (No)</option>
+                            <option value="yes">نعم (Yes)</option>
+                            <option value="unsure">غير متأكد (Unsure)</option>
+                        </select>
+                    </div>
+                     <div id="glucose-section" class="hidden-section"> {/* Show only if diabetes=yes */}
+                        <label for="glucose" class="block text-gray-700 font-medium mb-2">إذا كنت تعرف، ما هو مستوى السكر في دمك الآن؟ (If known, current blood sugar?)</label>
+                        <input type="number" step="0.1" id="glucose" name="glucose" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="mg/dL أو mmol/L">
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button type="button" onclick="nextStep(1)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out">
+                        التالي (Next) &rarr;
+                    </button>
+                </div>
+            </section>
+
+            {/* Step 2: Main Symptom */}
+            <section id="step-2" class="step-section hidden-section border-b pb-8 mb-8">
+                <h3 class="text-2xl font-semibold mb-6 text-gray-700 border-r-4 border-blue-500 pr-4">الخطوة 2: ما هي المشكلة الرئيسية؟</h3>
+                 <div class="mb-6">
+                    <label for="main-symptom" class="block text-gray-700 font-medium mb-2">اختر العرض الرئيسي الذي تعاني منه (Select your main symptom):</label>
+                    <select id="main-symptom" name="main_symptom" required class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">-- اختر العرض الأهم --</option>
+                        {/* Simplified, patient-friendly terms */}
+                        <option value="cannot_breathe">لا أستطيع التنفس / غصة شديدة (Cannot breathe / Severe choking)</option>
+                        <option value="severe_chest_pain">ألم شديد أو ضغط في الصدر (Severe chest pain or pressure)</option>
+                        <option value="severe_breathing_difficulty">صعوبة شديدة في التنفس (Severe difficulty breathing)</option>
+                        <option value="severe_bleeding">نزيف حاد لا يتوقف (Severe bleeding that won't stop)</option>
+                        <option value="not_responding">فقدان الوعي / صعوبة شديدة في الإفاقة (Unconscious / Very difficult to wake up)</option>
+                        <option value="active_seizure">نوبة تشنج مستمرة الآن (Ongoing seizure now)</option>
+                        <option value="stroke_signs">علامات جلطة دماغية (مثل: تدلي الوجه، ضعف ذراع، صعوبة كلام) (Stroke signs - e.g., face droop, arm weakness, speech difficulty)</option>
+                        <option value="severe_allergic_reaction">رد فعل تحسسي شديد (تورم، صعوبة تنفس) (Severe allergic reaction - swelling, trouble breathing)</option>
+                        <option value="confusion_severe">تشوش ذهني حاد / ارتباك شديد (Severe confusion)</option>
+                        <option value="severe_pain_other">ألم شديد جداً (غير الصدر) (Very severe pain - non-chest)</option>
+                        <option value="moderate_breathing_difficulty">صعوبة متوسطة في التنفس (Moderate difficulty breathing)</option>
+                        <option value="poison_overdose">اشتباه تسمم أو جرعة زائدة (Suspected poisoning or overdose)</option>
+                        <option value="moderate_bleeding">نزيف متوسط (يحتاج ضغط) (Moderate bleeding - needs pressure)</option>
+                        <option value="fever_very_high">حمى شديدة جداً (Very high fever)</option>
+                        <option value="severe_headache">صداع شديد جداً ومفاجئ (Very severe, sudden headache)</option>
+                        <option value="severe_abdominal_pain">ألم شديد في البطن (Severe abdominal pain)</option>
+                        <option value="moderate_pain">ألم متوسط (Moderate pain)</option>
+                        <option value="mild_breathing_difficulty">صعوبة خفيفة في التنفس (Mild difficulty breathing)</option>
+                        <option value="vomiting_diarrhea">قيء أو إسهال (Vomiting or diarrhea)</option>
+                        <option value="fever_mild_moderate">حمى خفيفة أو متوسطة (Mild or moderate fever)</option>
+                        <option value="minor_injury">إصابة طفيفة (Minor injury)</option>
+                        <option value="mild_pain_symptoms">ألم خفيف / أعراض خفيفة أخرى (Mild pain / Other mild symptoms)</option>
+                        <option value="other">شيء آخر (Something else - describe below)</option>
+                    </select>
+                </div>
+                 <div class="mb-6">
+                    <label for="symptom-details" class="block text-gray-700 font-medium mb-2">صف المشكلة بكلماتك (Describe the problem in your own words):</label>
+                    <textarea id="symptom-details" name="symptom_details" rows="3" class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="prevStep(2)" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out">
+                        &larr; السابق (Previous)
+                    </button>
+                    <button type="button" onclick="nextStep(2)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out">
+                        التالي (Next) &rarr;
+                    </button>
+                </div>
+            </section>
+
+            {/* Step 3: Further Assessment */}
+            <section id="step-3" class="step-section hidden-section border-b pb-8 mb-8">
+                <h3 class="text-2xl font-semibold mb-6 text-gray-700 border-r-4 border-blue-500 pr-4">الخطوة 3: أسئلة إضافية</h3>
+
+                 {/* Level of Consciousness */}
+                 <fieldset class="mb-6 border p-4 rounded-md">
+                    <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">مستوى الوعي (Your Alertness)</legend>
+                    <p class="text-gray-600 mb-4">كيف تشعر الآن؟ (How are you feeling now?)</p>
+                    <div class="space-y-3">
+                         <label class="flex items-center p-3 border rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="alertness" value="A" required class="form-radio text-blue-600 h-5 w-5">
+                            <span class="ms-3 text-lg">طبيعي وواعي تماماً (Fully awake and alert)</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="alertness" value="V" class="form-radio text-blue-600 h-5 w-5">
+                            <span class="ms-3 text-lg">أشعر بالنعاس أو الارتباك قليلاً (Drowsy or a bit confused, but respond)</span>
+                        </label>
+                         <label class="flex items-center p-3 border rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="alertness" value="P" class="form-radio text-blue-600 h-5 w-5">
+                            <span class="ms-3 text-lg">مرتبك جداً / يصعب إيقاظي (Very confused / Difficult to wake up)</span>
+                        </label>
+                         <label class="flex items-center p-3 border rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="alertness" value="U" class="form-radio text-blue-600 h-5 w-5">
+                            <span class="ms-3 text-lg">لا أستجيب / فاقد الوعي (Unresponsive / Unconscious)</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                 {/* Breathing Assessment */}
+                 <fieldset class="mb-6 border p-4 rounded-md">
+                    <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">التنفس (Breathing)</legend>
+                    <label for="breathing-difficulty" class="block text-gray-700 font-medium mb-2">ما مدى صعوبة التنفس لديك؟ (How much trouble are you having breathing?)</label>
+                    <select id="breathing-difficulty" name="breathing_difficulty" required class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                        <option value="none">لا توجد صعوبة (No trouble)</option>
+                        <option value="mild">صعوبة خفيفة (Mild trouble)</option>
+                        <option value="moderate">صعوبة متوسطة (Moderate trouble)</option>
+                        <option value="severe">صعوبة شديدة (Severe trouble)</option>
+                        <option value="cannot_breathe">لا أستطيع التنفس (Cannot breathe at all)</option>
+                    </select>
+                </fieldset>
+
+                {/* Pain Assessment */}
+                 <fieldset class="mb-6 border p-4 rounded-md">
+                    <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">الألم (Pain)</legend>
+                    <label for="pain-score" class="block text-gray-700 font-medium mb-1">إذا كنت تشعر بألم، ما مدى شدته؟ (0 = لا يوجد ألم، 10 = ألم لا يطاق)</label>
+                    <label for="pain-score" class="block text-gray-500 text-sm mb-2">(If you have pain, how severe is it? 0 = No pain, 10 = Unbearable pain)</label>
+                    <input type="range" id="pain-score" name="pain_score" min="0" max="10" step="1" value="0" class="w-full h-3 bg-gray-200 rounded-lg appearance-auto cursor-pointer range-lg dark:bg-gray-700 accent-blue-600">
+                    <div class="flex justify-between text-sm text-gray-600 px-1 mt-1">
+                        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                    </div>
+                     <output id="pain-score-output" class="text-center block font-medium text-lg mt-2">0</output>
+                </fieldset>
+
+                {/* Other Signs */}
+                 <fieldset class="border p-4 rounded-md">
+                    <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">علامات أخرى (Other Signs)</legend>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div>
+                            <label for="bleeding" class="block text-gray-700 font-medium mb-2">هل يوجد نزيف؟ (Is there any bleeding?)</label>
+                            <select id="bleeding" name="bleeding" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="none">لا يوجد (None)</option>
+                                <option value="minor">نزيف خفيف (يتوقف بسهولة) (Minor - stops easily)</option>
+                                <option value="moderate">نزيف متوسط (يحتاج ضغط) (Moderate - needs pressure)</option>
+                                <option value="severe">نزيف شديد (يصعب إيقافه) (Severe - hard to stop)</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="dehydration" class="block text-gray-700 font-medium mb-2">هل تشعر بعطش شديد أو جفاف بالفم أو دوخة؟ (Feeling very thirsty, dry mouth, or dizzy?)</label>
+                            <select id="dehydration" name="dehydration" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="none">لا (No)</option>
+                                <option value="mild">قليلاً (A little)</option>
+                                <option value="moderate">نعم، بشكل متوسط (Yes, moderately)</option>
+                                <option value="severe">نعم، بشكل شديد (Yes, severely)</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="feverish" class="block text-gray-700 font-medium mb-2">هل تشعر بأن لديك حمى (سخونة)؟ (Do you feel like you have a fever?)</label>
+                            <select id="feverish" name="feverish" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="no">لا (No)</option>
+                                <option value="yes_mild_mod">نعم، خفيفة أو متوسطة (Yes, mild/moderate)</option>
+                                <option value="yes_high">نعم، عالية (Yes, high)</option>
+                                <option value="unsure">غير متأكد (Unsure)</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="trauma_occurred" class="block text-gray-700 font-medium mb-2">هل تعرضت لحادث أو إصابة خطيرة مؤخراً؟ (Did you have a serious accident or injury recently?)</label>
+                            <select id="trauma_occurred" name="trauma_occurred" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="no">لا (No)</option>
+                                <option value="yes_minor">نعم، إصابة بسيطة (Yes, minor injury)</option>
+                                <option value="yes_significant">نعم، حادث أو إصابة خطيرة (Yes, serious accident/injury)</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="prevStep(3)" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out">
+                        &larr; السابق (Previous)
+                    </button>
+                    <button type="button" onclick="showSummary()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out">
+                        عرض النتيجة الأولية (Show Preliminary Result) &rarr;
+                    </button>
+                </div>
+            </section>
+
+            {/* Step 4: Summary and Result */}
+            <section id="step-4" class="step-section hidden-section">
+                <h3 class="text-2xl font-semibold mb-6 text-gray-700 border-r-4 border-green-500 pr-4">الخطوة 4: النتيجة الأولية</h3>
+
+                 {/* Reminder Disclaimer */}
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-md shadow" role="alert">
+                    <p class="font-bold text-lg">تذكير (Reminder)</p>
+                    <p class="mt-1">هذه النتيجة هي تقدير أولي فقط ولا تغني عن التقييم الطبي المتخصص.</p>
+                    <p class="mt-1">This result is only a preliminary estimate and does not replace professional medical evaluation.</p>
+                     <p class="mt-2 font-semibold">إذا كانت الأعراض شديدة أو مقلقة، اتصل بالطوارئ <span class="font-bold">997</span>.</p>
+                     <p class="mt-1 font-semibold">If symptoms are severe or worrying, call emergency services <span class="font-bold">997</span>.</p>
+                </div>
+
+                {/* Display Area for Summary */}
+                <div id="summary-output" class="bg-gray-50 p-6 rounded-lg shadow-inner mb-8 space-y-3 text-lg">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-4">ملخص الأعراض المدخلة (Summary of Entered Symptoms):</h4>
+                    {/* Summary content will be populated by JavaScript */}
+                     <p><strong>العمر:</strong> <span id="summary-age"></span></p>
+                     <p><strong>الجنس:</strong> <span id="summary-gender"></span></p>
+                     <p><strong>العرض الرئيسي:</strong> <span id="summary-main-symptom"></span></p>
+                     <p><strong>تفاصيل إضافية:</strong> <span id="summary-symptom-details"></span></p>
+                     <p><strong>مستوى الوعي:</strong> <span id="summary-alertness"></span></p>
+                     <p><strong>صعوبة التنفس:</strong> <span id="summary-breathing"></span></p>
+                     <p><strong>مستوى الألم:</strong> <span id="summary-pain"></span></p>
+                     <p><strong>النزيف:</strong> <span id="summary-bleeding"></span></p>
+                     <p><strong>علامات الجفاف:</strong> <span id="summary-dehydration"></span></p>
+                     <p><strong>الشعور بالحمى:</strong> <span id="summary-feverish"></span></p>
+                     <p><strong>حادث / إصابة خطيرة:</strong> <span id="summary-trauma"></span></p>
+                     <p><strong>لديك سكري:</strong> <span id="summary-diabetes"></span></p>
+                     <p><strong>مستوى السكر (إن وجد):</strong> <span id="summary-glucose"></span></p>
+                     <hr class="my-4">
+                     <p class="text-2xl font-bold"><strong>مستوى الأولوية الأولي المقدر (Estimated Preliminary Priority Level):</strong>
+                        <span id="summary-ctas-level" class="ctas-default"></span>
+                     </p>
+                     <div id="recommendation" class="mt-4 text-lg font-medium">
+                         {/* Recommendation text will be added here by JS */}
+                     </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div class="mt-8 flex flex-col md:flex-row justify-between gap-4">
+                    <button type="button" onclick="prevStep(4)" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out w-full md:w-auto">
+                        &larr; السابق (Previous)
+                    </button>
+                    <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                         <button type="button" onclick="preparePrint()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out w-full md:w-auto">
+                            طباعة الملخص (Print Summary)
+                        </button>
+                        {/* Keep CSV for potential data analysis, but less relevant for patient */}
+                        <button type="button" onclick="downloadCSV()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out w-full md:w-auto">
+                            تحميل كـ CSV (Download CSV)
+                        </button>
+                         <button type="button" onclick="startNew()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out w-full md:w-auto">
+                            بدء تقييم جديد (Start New Assessment)
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </form>
+
+         {/* Area for printing */}
+        <div id="print-area" class="hidden">
+            {/* Content for printing will be copied here by JS */}
+        </div>
+    </div>
+
+    {/* JavaScript */}
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4; // 4 steps total
+
+        // Show glucose field only if diabetes is selected
+        const diabetesSelect = document.getElementById('has-diabetes');
+        const glucoseSection = document.getElementById('glucose-section');
+        if (diabetesSelect && glucoseSection) {
+            diabetesSelect.addEventListener('change', function() {
+                if (this.value === 'yes') {
+                    glucoseSection.classList.remove('hidden-section');
+                } else {
+                    glucoseSection.classList.add('hidden-section');
+                    document.getElementById('glucose').value = ''; // Clear glucose if diabetes is not 'yes'
+                }
+            });
+        }
+
+
+        // Function to navigate to the next step
+        function nextStep(step) {
+            // Validation
+            if (step === 1) {
+                const ageInput = document.getElementById('patient-age');
+                if (!ageInput.value || parseInt(ageInput.value) < 0) {
+                    alert('Please enter a valid age.');
+                    ageInput.focus();
+                    return;
+                }
+            }
+             if (step === 2) {
+                const symptomSelect = document.getElementById('main-symptom');
+                if (!symptomSelect.value) {
+                    alert('Please select your main symptom.');
+                    symptomSelect.focus();
+                    return;
+                }
+            }
+             if (step === 3) {
+                 const alertnessElement = document.querySelector('input[name="alertness"]:checked');
+                 const breathingElement = document.getElementById('breathing-difficulty');
+                 if (!alertnessElement) {
+                     alert('Please select your current alertness level.');
+                     // Focus first radio button
+                     const firstAlertness = document.querySelector('input[name="alertness"]');
+                     if(firstAlertness) firstAlertness.focus();
+                     return;
+                 }
+                  if (!breathingElement.value) {
+                     alert('Please select your level of breathing difficulty.');
+                     breathingElement.focus();
+                     return;
+                 }
+             }
+
+
+            if (currentStep < totalSteps) {
+                document.getElementById(`step-${currentStep}`).classList.add('hidden-section');
+                currentStep++;
+                document.getElementById(`step-${currentStep}`).classList.remove('hidden-section');
+                window.scrollTo(0, 0); // Scroll to top
+            }
+        }
+
+        // Function to navigate to the previous step
+        function prevStep(step) {
+            if (currentStep > 1) {
+                document.getElementById(`step-${currentStep}`).classList.add('hidden-section');
+                currentStep--;
+                document.getElementById(`step-${currentStep}`).classList.remove('hidden-section');
+                window.scrollTo(0, 0); // Scroll to top
+            }
+        }
+
+         // Update pain score display
+        const painSlider = document.getElementById('pain-score');
+        const painOutput = document.getElementById('pain-score-output');
+        if(painSlider && painOutput) {
+            painOutput.textContent = painSlider.value; // Initial value
+            painSlider.oninput = function() {
+                painOutput.textContent = this.value;
+            }
+        }
+
+        // --- Patient Self-Assessment CTAS-Inspired Logic ---
+        // VERSION Patient.1 - Simplified 5-level logic based on self-reported symptoms.
+        // IMPORTANT: This logic is a ROUGH ESTIMATE based on patient input.
+        // It is significantly less reliable than a clinical assessment.
+        // **IT REQUIRES THOROUGH REVIEW, VALIDATION, AND ADJUSTMENT BY CLINICAL EXPERTS.
+        // STRONG DISCLAIMERS ARE ESSENTIAL. THIS IS NOT A DIAGNOSTIC TOOL.**
+        function calculatePatientTriage() {
+            // --- Get Input Data ---
+            const age = parseInt(document.getElementById('patient-age').value) || 0;
+            const mainSymptom = document.getElementById('main-symptom').value;
+            const alertnessElement = document.querySelector('input[name="alertness"]:checked');
+            const alertness = alertnessElement ? alertnessElement.value : null; // A, V, P, U (Simplified patient version)
+            const breathing = document.getElementById('breathing-difficulty').value; // none, mild, moderate, severe, cannot_breathe
+            const pain = parseInt(document.getElementById('pain-score').value) || 0;
+            const bleeding = document.getElementById('bleeding').value; // none, minor, moderate, severe
+            const dehydration = document.getElementById('dehydration').value; // none, mild, moderate, severe
+            const feverish = document.getElementById('feverish').value; // no, yes_mild_mod, yes_high, unsure
+            const trauma = document.getElementById('trauma_occurred').value; // no, yes_minor, yes_significant
+            const hasDiabetes = document.getElementById('has-diabetes').value === 'yes';
+            const glucose = hasDiabetes ? (parseInt(document.getElementById('glucose').value) || null) : null; // Only consider if patient has diabetes
+
+            let ctasLevel = 5; // Default to lowest acuity
+
+            // --- Level 1: Resuscitation / Immediate Emergency ---
+            // Clear signs of immediate life threat based on patient report.
+            let isLevel1 = false;
+            if (mainSymptom === 'cannot_breathe' || breathing === 'cannot_breathe' ||
+                mainSymptom === 'severe_bleeding' || bleeding === 'severe' ||
+                mainSymptom === 'not_responding' || alertness === 'U' || alertness === 'P' || // Unresponsive or only responds to pain stimulus equivalent
+                mainSymptom === 'active_seizure' ||
+                mainSymptom === 'severe_chest_pain' // Assume worst case for severe chest pain/pressure
+               ) {
+                isLevel1 = true;
+            }
+            if (isLevel1) return 1;
+
+            // --- Level 2: Emergent ---
+            // High-risk symptoms or situations reported by the patient.
+            let isLevel2 = false;
+             if (mainSymptom === 'severe_breathing_difficulty' || breathing === 'severe' ||
+                mainSymptom === 'stroke_signs' ||
+                mainSymptom === 'severe_allergic_reaction' ||
+                mainSymptom === 'confusion_severe' || alertness === 'V' || // Responds but confused/drowsy
+                mainSymptom === 'severe_pain_other' || pain >= 8 || // Very severe pain
+                dehydration === 'severe' || // Signs of severe dehydration
+                trauma === 'yes_significant' || // Report of significant trauma
+                (age < 0.25 && feverish !== 'no') || // Any feverish feeling in infant < 3 months is high risk
+                (hasDiabetes && glucose !== null && (glucose < 60 || glucose > 400)) // Example critical glucose mg/dL - VALIDATE & consider units
+               ) {
+                 isLevel2 = true;
+            }
+            if (isLevel2) return 2;
+
+            // --- Level 3: Urgent ---
+            // Symptoms needing prompt attention but not immediately life-threatening based on report.
+            let isLevel3 = false;
+            if (mainSymptom === 'moderate_breathing_difficulty' || breathing === 'moderate' ||
+                mainSymptom === 'poison_overdose' || // Needs urgent assessment
+                mainSymptom === 'moderate_bleeding' || bleeding === 'moderate' ||
+                mainSymptom === 'fever_very_high' || feverish === 'yes_high' ||
+                mainSymptom === 'severe_headache' || // Could be serious
+                mainSymptom === 'severe_abdominal_pain' ||
+                pain >= 5 && pain <= 7 || // Moderate-severe pain
+                dehydration === 'moderate' // Signs of moderate dehydration
+               ) {
+                isLevel3 = true;
+            }
+             if (isLevel3) return 3;
+
+            // --- Level 4: Less Urgent ---
+            // Symptoms causing discomfort or concern but appear stable based on report.
+            let isLevel4 = false;
+             if (mainSymptom === 'moderate_pain' || (pain >= 2 && pain <= 4) || // Mild-moderate pain
+                mainSymptom === 'mild_breathing_difficulty' || breathing === 'mild' ||
+                mainSymptom === 'vomiting_diarrhea' || // If dehydration not severe/moderate
+                mainSymptom === 'fever_mild_moderate' || feverish === 'yes_mild_mod' ||
+                bleeding === 'minor' || dehydration === 'mild' ||
+                trauma === 'yes_minor'
+               ) {
+                isLevel4 = true;
+            }
+            if (isLevel4) return 4;
+
+            // --- Level 5: Non-Urgent ---
+            // Mild symptoms, likely safe to wait or seek non-emergency advice.
+            // If none of the above criteria are met, it defaults to Level 5.
+            // e.g., mainSymptom === 'mild_pain_symptoms' and alertness === 'A', breathing === 'none', pain < 2 etc.
+
+            return ctasLevel; // Return the final calculated level (default is 5)
+        }
+
+
+        // Function to gather data and display summary
+        function showSummary() {
+            // Gather data from form
+            const formData = new FormData(document.getElementById('symptom-form'));
+            const data = Object.fromEntries(formData.entries());
+
+            // Calculate Triage Level
+            const ctasLevel = calculatePatientTriage(); // Returns 1, 2, 3, 4, or 5
+
+            // Populate summary fields
+            document.getElementById('summary-age').textContent = data.patient_age || 'N/A';
+            const genderSelect = document.getElementById('patient-gender');
+            document.getElementById('summary-gender').textContent = genderSelect.options[genderSelect.selectedIndex]?.text || 'N/A';
+
+            const symptomSelect = document.getElementById('main-symptom');
+            document.getElementById('summary-main-symptom').textContent = symptomSelect.options[symptomSelect.selectedIndex]?.text || 'N/A';
+            document.getElementById('summary-symptom-details').textContent = data.symptom_details || 'N/A';
+
+            const alertnessElement = document.querySelector('input[name="alertness"]:checked');
+            document.getElementById('summary-alertness').textContent = alertnessElement ? alertnessElement.labels[0].textContent.split('(')[1].split(')')[0] : 'N/A'; // Extract A/V/P/U
+
+            const breathingSelect = document.getElementById('breathing-difficulty');
+            document.getElementById('summary-breathing').textContent = breathingSelect.options[breathingSelect.selectedIndex]?.text || 'N/A';
+
+            document.getElementById('summary-pain').textContent = data.pain_score || '0';
+
+            const bleedingSelect = document.getElementById('bleeding');
+            document.getElementById('summary-bleeding').textContent = bleedingSelect.options[bleedingSelect.selectedIndex]?.text || 'N/A';
+
+            const dehydrationSelect = document.getElementById('dehydration');
+            document.getElementById('summary-dehydration').textContent = dehydrationSelect.options[dehydrationSelect.selectedIndex]?.text || 'N/A';
+
+             const feverishSelect = document.getElementById('feverish');
+            document.getElementById('summary-feverish').textContent = feverishSelect.options[feverishSelect.selectedIndex]?.text || 'N/A';
+
+             const traumaSelect = document.getElementById('trauma_occurred');
+            document.getElementById('summary-trauma').textContent = traumaSelect.options[traumaSelect.selectedIndex]?.text || 'N/A';
+
+             const diabetesSelect = document.getElementById('has-diabetes');
+             document.getElementById('summary-diabetes').textContent = diabetesSelect.options[diabetesSelect.selectedIndex]?.text || 'N/A';
+             document.getElementById('summary-glucose').textContent = data.glucose || 'N/A';
+
+
+            // Display CTAS Level and Apply Color
+             const levelSpan = document.getElementById('summary-ctas-level');
+             levelSpan.textContent = ctasLevel;
+             levelSpan.className = 'font-bold'; // Reset base class
+             let recommendationText = '';
+             let recommendationColor = 'text-gray-700';
+
+             switch(ctasLevel) {
+                 case 1:
+                     levelSpan.classList.add('ctas-level-1');
+                     recommendationText = 'الأعراض تشير إلى حالة طارئة جداً. اتصل بالرقم 997 فوراً!';
+                     recommendationColor = 'text-red-700';
+                     break;
+                 case 2:
+                     levelSpan.classList.add('ctas-level-2');
+                      recommendationText = 'الأعراض تتطلب تقييماً طبياً عاجلاً. يوصى بالاتصال بالطوارئ 997 أو التوجه إلى أقرب قسم طوارئ.';
+                      recommendationColor = 'text-orange-700';
+                     break;
+                 case 3:
+                     levelSpan.classList.add('ctas-level-3');
+                      recommendationText = 'الأعراض قد تحتاج إلى تقييم طبي قريباً. استشر طبيبك أو توجه إلى مركز رعاية صحية.';
+                      recommendationColor = 'text-amber-700';
+                     break;
+                 case 4:
+                     levelSpan.classList.add('ctas-level-4');
+                      recommendationText = 'الأعراض تبدو أقل إلحاحاً، لكن يفضل استشارة طبيب أو مقدم رعاية صحية.';
+                      recommendationColor = 'text-green-700';
+                     break;
+                 case 5:
+                     levelSpan.classList.add('ctas-level-5');
+                      recommendationText = 'الأعراض تبدو غير عاجلة. يمكنك متابعة الأعراض واستشارة طبيب إذا استمرت أو ساءت.';
+                      recommendationColor = 'text-blue-700';
+                     break;
+                 default:
+                    levelSpan.classList.add('ctas-default');
+                    recommendationText = 'لا يمكن تحديد مستوى الأولوية. يرجى استشارة طبيب.';
+                    break;
+             }
+             // Display recommendation
+             const recommendationDiv = document.getElementById('recommendation');
+             recommendationDiv.textContent = recommendationText;
+             recommendationDiv.className = `mt-4 text-lg font-medium ${recommendationColor}`;
+
+
+            // Show summary step
+            nextStep(3); // Assumes current step is 3 when this is called
+        }
+
+        // Function to prepare content for printing
+        function preparePrint() {
+            const summaryContent = document.getElementById('summary-output').innerHTML;
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = `<h2 style="text-align: center; font-family: Inter, sans-serif; color: black; margin-bottom: 20px;">Preliminary Symptom Assessment Summary</h2>` + summaryContent;
+            printArea.style.fontFamily = 'Inter, sans-serif';
+            printArea.style.color = 'black';
+            printArea.classList.remove('hidden');
+            window.print();
+            printArea.classList.add('hidden');
+            printArea.innerHTML = '';
+        }
+
+        // Function to download data as CSV
+        function downloadCSV() {
+            const formData = new FormData(document.getElementById('symptom-form'));
+            const data = Object.fromEntries(formData.entries());
+            const ctasLevel = calculatePatientTriage();
+
+            data['ctas_level_preliminary'] = ctasLevel;
+
+            // Map selected text for dropdowns/radios
+             const symptomSelect = document.getElementById('main-symptom');
+             data['main_symptom_text'] = symptomSelect.options[symptomSelect.selectedIndex]?.text || data.main_symptom;
+             const alertnessElement = document.querySelector('input[name="alertness"]:checked');
+             data['alertness_text'] = alertnessElement ? alertnessElement.labels[0].textContent : 'N/A';
+             const breathingSelect = document.getElementById('breathing-difficulty');
+             data['breathing_difficulty_text'] = breathingSelect.options[breathingSelect.selectedIndex]?.text || data.breathing_difficulty;
+             const bleedingSelect = document.getElementById('bleeding');
+             data['bleeding_text'] = bleedingSelect.options[bleedingSelect.selectedIndex]?.text || data.bleeding;
+             const dehydrationSelect = document.getElementById('dehydration');
+             data['dehydration_text'] = dehydrationSelect.options[dehydrationSelect.selectedIndex]?.text || data.dehydration;
+             const feverishSelect = document.getElementById('feverish');
+             data['feverish_text'] = feverishSelect.options[feverishSelect.selectedIndex]?.text || data.feverish;
+             const traumaSelect = document.getElementById('trauma_occurred');
+             data['trauma_occurred_text'] = traumaSelect.options[traumaSelect.selectedIndex]?.text || data.trauma_occurred;
+             const genderSelect = document.getElementById('patient-gender');
+             data['patient_gender_text'] = genderSelect.options[genderSelect.selectedIndex]?.text || data.patient_gender;
+              const diabetesSelect = document.getElementById('has-diabetes');
+             data['has_diabetes_text'] = diabetesSelect.options[diabetesSelect.selectedIndex]?.text || data.has_diabetes;
+
+
+             // Define CSV headers and corresponding data keys
+             const csvMap = {
+                'Age': 'patient_age',
+                'Gender': 'patient_gender_text',
+                'Main Symptom': 'main_symptom_text',
+                'Symptom Details': 'symptom_details',
+                'Alertness': 'alertness_text',
+                'Breathing Difficulty': 'breathing_difficulty_text',
+                'Pain Score': 'pain_score',
+                'Bleeding': 'bleeding_text',
+                'Dehydration Signs': 'dehydration_text',
+                'Feverish Feeling': 'feverish_text',
+                'Serious Trauma Recently': 'trauma_occurred_text',
+                'Has Diabetes': 'has_diabetes_text',
+                'Reported Glucose': 'glucose',
+                'CTAS Level (Preliminary Estimate)': 'ctas_level_preliminary'
+            };
+
+            const csvHeaders = Object.keys(csvMap);
+            const csvDataRow = csvHeaders.map(header => data[csvMap[header]] || '');
+
+            // Format to CSV string with BOM
+            let csvContent = "\uFEFF" + csvHeaders.map(h => `"${h}"`).join(",") + "\n" + csvDataRow.map(d => `"${String(d).replace(/"/g, '""')}"`).join(",");
+
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `symptom_assessment_${timestamp}.csv`;
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+         // Function to reset the form and go back to step 1
+        function startNew() {
+            if (confirm('هل أنت متأكد من رغبتك في بدء تقييم جديد؟ سيتم فقدان جميع البيانات الحالية.\nAre you sure you want to start a new assessment? All current data will be lost.')) {
+                document.getElementById('symptom-form').reset();
+                 const painOutput = document.getElementById('pain-score-output');
+                 if(painOutput) painOutput.textContent = '0';
+                 const painSlider = document.getElementById('pain-score');
+                 if(painSlider) painSlider.value = '0';
+                 // Hide glucose section again
+                 const glucoseSection = document.getElementById('glucose-section');
+                 if(glucoseSection) glucoseSection.classList.add('hidden-section');
+
+                document.querySelectorAll('.step-section').forEach(section => {
+                    if (section.id !== 'step-1') {
+                         section.classList.add('hidden-section');
+                    }
+                });
+                document.getElementById('step-1').classList.remove('hidden-section');
+                currentStep = 1;
+                window.scrollTo(0, 0);
+            }
+        }
+
+    </script>
+</body>
+</html>

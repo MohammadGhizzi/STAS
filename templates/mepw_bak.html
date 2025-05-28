@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="{{ lang or 'ar' }}" dir="{{ 'ltr' if lang == 'en' else 'rtl' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{ 'Pre-Hospital Examination Tool' if lang == 'en' else 'أداة فحص ما قبل المستشفى' }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        /* Apply Inter font globally */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for hiding sections */
+        .hidden-section {
+            display: none;
+        }
+        /* Dark mode styles */
+        .dark {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .dark .bg-white {
+            background-color: #2d2d2d;
+        }
+        .dark .bg-gray-100 {
+            background-color: #1a1a1a;
+        }
+        .dark .bg-gray-50 {
+            background-color: #2d2d2d;
+        }
+        .dark .text-gray-900 {
+            color: #e0e0e0;
+        }
+        .dark .text-gray-700 {
+            color: #b0b0b0;
+        }
+        .dark .text-gray-600 {
+            color: #9a9a9a;
+        }
+        .dark .border-gray-300 {
+            border-color: #4a4a4a;
+        }
+        .dark input, .dark select, .dark textarea {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border-color: #4a4a4a;
+        }
+        /* Basic styling for printable view */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            button {
+                display: none; /* Hide buttons in print view */
+            }
+        }
+        /* Custom focus ring style */
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px #3b82f6; /* Blue focus ring */
+            border-color: #3b82f6;
+        }
+        /* Mobile responsive improvements */
+        @media (max-width: 640px) {
+            .container {
+                padding: 0.5rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            h2 {
+                font-size: 1.25rem;
+            }
+            h3 {
+                font-size: 1.1rem;
+            }
+            button {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+        /* Larger text for accessibility */
+        label, legend {
+            font-size: 1.1rem; /* Slightly larger labels */
+        }
+        input, select, button, textarea {
+            font-size: 1rem; /* Ensure form elements are readable */
+            padding: 0.75rem 1rem; /* Increase padding for easier interaction */
+            border-radius: 0.5rem; /* Consistent rounded corners */
+        }
+        button {
+            transition: background-color 0.2s ease-in-out;
+        }
+        /* CTAS Level Colors (5 Levels) */
+        .ctas-level-1 { color: #dc2626; } /* Red-600 */
+        .ctas-level-2 { color: #f97316; } /* Orange-600 */
+        .ctas-level-3 { color: #f59e0b; } /* Amber-500 */
+        .ctas-level-4 { color: #16a34a; } /* Green-600 */
+        .ctas-level-5 { color: #3b82f6; } /* Blue-500 */
+        .ctas-default { color: #4b5563; } /* Gray-600 */
+
+    </style>
+</head>
+<body class="{{ 'dark' if theme == 'dark' else '' }} bg-gray-100 text-gray-900">
+    <!-- Language and Theme Toggle -->
+    <div class="fixed top-4 {{ 'left-4' if lang == 'en' else 'right-4' }} z-50 flex gap-2">
+        <button onclick="toggleLanguage()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg shadow-md transition duration-150 ease-in-out text-sm">
+            <i class="fas fa-language"></i> {{ 'AR' if lang == 'en' else 'EN' }}
+        </button>
+        <button onclick="toggleTheme()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg shadow-md transition duration-150 ease-in-out text-sm">
+            <i class="fas {{ 'fa-sun' if theme == 'dark' else 'fa-moon' }}"></i>
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl bg-white shadow-lg rounded-lg mt-10">
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-blue-600 mb-4 md:mb-8">{{ 'Pre-Hospital Examination Tool' if lang == 'en' else 'أداة فحص ما قبل المستشفى' }}</h1>
+        <h2 class="text-lg md:text-xl text-center text-gray-600 mb-4 md:mb-8">{{ 'CTAS-Based Triage System for Saudi Arabia' if lang == 'en' else 'نظام الفرز المبني على CTAS للمملكة العربية السعودية' }}</h2>
+        <div class="text-center mb-4 space-x-4">
+            <a href="/self_diagnosis" class="text-blue-500 hover:text-blue-700 underline text-sm md:text-base">{{ 'Self-Assessment Tool' if lang == 'en' else 'أداة التقييم الذاتي' }}</a>
+            <a href="/reference" class="text-blue-500 hover:text-blue-700 underline text-sm md:text-base">{{ 'Reference Info' if lang == 'en' else 'معلومات مرجعية' }}</a>
+        </div>
+
+        <form id="triage-form">
+
+            <section id="step-1" class="step-section border-b pb-8 mb-8">
+                <h3 class="text-xl md:text-2xl font-semibold mb-6 text-gray-700 {{ 'border-l-4' if lang == 'en' else 'border-r-4' }} border-blue-500 {{ 'pl-4' if lang == 'en' else 'pr-4' }}">{{ 'Step 1: Patient Information' if lang == 'en' else 'الخطوة 1: معلومات المريض' }}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div>
+                        <label for="patient-name" class="block text-gray-700 font-medium mb-2">{{ 'Patient Name:' if lang == 'en' else 'اسم المريض:' }}</label>
+                        <input type="text" id="patient-name" name="patient_name" class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="patient-age" class="block text-gray-700 font-medium mb-2">{{ 'Age:' if lang == 'en' else 'العمر:' }}</label>
+                        <input type="number" id="patient-age" name="patient_age" min="0" class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="patient-gender" class="block text-gray-700 font-medium mb-2">{{ 'Gender:' if lang == 'en' else 'الجنس:' }}</label>
+                        <select id="patient-gender" name="patient_gender" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">{{ 'Select' if lang == 'en' else 'اختر' }}</option>
+                            <option value="male">{{ 'Male' if lang == 'en' else 'ذكر' }}</option>
+                            <option value="female">{{ 'Female' if lang == 'en' else 'أنثى' }}</option>
+                            <option value="other">{{ 'Other' if lang == 'en' else 'آخر' }}</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="patient-id" class="block text-gray-700 font-medium mb-2">{{ 'ID/MRN (Optional):' if lang == 'en' else 'رقم الهوية/الملف (اختياري):' }}</label>
+                        <input type="text" id="patient-id" name="patient_id" class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <!-- Saudi-specific fields -->
+                    <div>
+                        <label for="has-diabetes" class="block text-gray-700 font-medium mb-2">{{ 'Diabetic Patient?' if lang == 'en' else 'مريض سكري؟' }}</label>
+                        <select id="has-diabetes" name="has_diabetes" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                            <option value="no">{{ 'No' if lang == 'en' else 'لا' }}</option>
+                            <option value="yes">{{ 'Yes' if lang == 'en' else 'نعم' }}</option>
+                            <option value="unknown">{{ 'Unknown' if lang == 'en' else 'غير معروف' }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button type="button" onclick="nextStep(1)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 md:px-8 rounded-lg shadow transition duration-150 ease-in-out">
+                        {{ 'Next' if lang == 'en' else 'التالي' }} &rarr;
+                    </button>
+                </div>
+            </section>
+
+// ... existing code ...
+</body>
+</html>

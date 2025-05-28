@@ -1,0 +1,873 @@
+data['respiratory_distress'] = 'moderate'
+    elif main_symptom == 'mild_breathing_difficulty' or breathing_difficulty == 'mild':
+        data['respiratory_distress'] = 'mild'
+    else:
+        data['respiratory_distress'] = 'none'
+        
+    # Map alertness to AVPU
+    data['avpu'] = data.get('alertness', 'A')
+    
+    # Map severe symptoms to chief complaints
+    if main_symptom in ['severe_chest_pain']:
+        data['chief_complaint'] = 'chest_pain_cardiac'
+    elif main_symptom in ['active_seizure']:
+        data['chief_complaint'] = 'seizure_active'
+    elif main_symptom in ['stroke_signs']:
+        data['chief_complaint'] = 'stroke'
+    elif main_symptom in ['severe_allergic_reaction']:
+        data['chief_complaint'] = 'anaphylaxis'
+    elif main_symptom in ['poison_overdose']:
+        data['chief_complaint'] = 'overdose'
+    elif main_symptom in ['severe_pain_other']:
+        data['chief_complaint'] = 'severe_pain'
+    elif main_symptom in ['severe_abdominal_pain']:
+        data['chief_complaint'] = 'abdominal_pain_severe'
+    elif main_symptom in ['minor_injury']:
+        data['chief_complaint'] = 'minor_trauma'
+        
+    # Calculate recommendations based on CTAS level
+    recommendation_html = generate_recommendation(ctas_level, main_symptom)
+    
+    # Prepare summary data for JSON response
+    summary_data = {
+        'age': data.get('patient_age', 'N/A'),
+        'gender': get_text_from_value('patient-gender', data.get('patient_gender'), 'self_assessment'),
+        'main_symptom': get_text_from_value('main-symptom', main_symptom, 'self_assessment'),
+        'symptom_details': data.get('symptom_details', 'N/A'),
+        'alertness': get_text_from_value('alertness', data.get('alertness', ''), 'self_assessment'),
+        'breathing': get_text_from_value('breathing-difficulty', data.get('breathing_difficulty', ''), 'self_assessment'),
+        'pain': data.get('pain_score', '0'),
+        'bleeding': get_text_from_value('bleeding', data.get('bleeding', ''), 'self_assessment'),
+        'dehydration': get_text_from_value('dehydration', data.get('dehydration', ''), 'self_assessment'),
+        'feverish': get_text_from_value('feverish', data.get('feverish', ''), 'self_assessment'),
+        'trauma': get_text_from_value('trauma_occurred', data.get('trauma_occurred', ''), 'self_assessment'),
+        'diabetes': get_text_from_value('has-diabetes', data.get('has_diabetes', ''), 'self_assessment'),
+        'glucose': data.get('glucose', 'N/A'),
+        'level': ctas_level,
+        'recommendation': recommendation_html
+    }
+    
+    return jsonify(summary_data)
+
+def generate_recommendation(ctas_level, main_symptom):
+    """Generate HTML recommendation based on CTAS level and symptoms."""
+    emergency_symptoms = [
+        'cannot_breathe', 'severe_chest_pain', 'severe_breathing_difficulty', 
+        'severe_bleeding', 'not_responding', 'active_seizure', 'stroke_signs',
+        'severe_allergic_reaction'
+    ]
+    
+    urgent_symptoms = [
+        'confusion_severe', 'poison_overdose', 'moderate_bleeding',
+        'fever_very_high', 'severe_headache', 'severe_abdominal_pain'
+    ]
+    
+    if ctas_level == 1:
+        return """
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+            <p class="font-bold text-lg">🚨 حالة طارئة (Emergency)</p>
+            <p>هذه الأعراض تشير إلى حالة طبية طارئة تتطلب رعاية فورية.</p>
+            <p class="font-bold mt-2">اتصل بالطوارئ على الرقم 997 الآن.</p>
+            <p class="mt-2">These symptoms indicate a medical emergency requiring immediate care.</p>
+            <p class="font-bold">Call emergency services at 997 now.</p>
+        </div>
+        """
+    elif ctas_level == 2:
+        return """
+        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-md">
+            <p class="font-bold text-lg">⚠️ حالة طارئة (Urgent Emergency)</p>
+            <p>هذه الأعراض تشير إلى حالة طبية طارئة تتطلب رعاية فورية.</p>
+            <p class="font-bold mt-2">اتصل بالطوارئ على الرقم 997 أو توجه إلى أقرب قسم طوارئ فوراً.</p>
+            <p class="mt-2">These symptoms indicate an urgent medical condition requiring prompt care.</p>
+            <p class="font-bold">Call 997 or go to the nearest emergency department immediately.</p>
+        </div>
+        """
+    elif ctas_level == 3:
+        return """
+        <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 rounded-md">
+            <p class="font-bold text-lg">⚠️ حالة ملحة (Urgent)</p>
+            <p>هذه الأعراض تشير إلى حالة تتطلب تقييم طبي خلال ساعات قليلة.</p>
+            <p class="font-bold mt-2">يجب زيارة قسم الطوارئ أو مركز رعاية عاجلة اليوم.</p>
+            <p class="mt-2">These symptoms indicate a condition requiring medical assessment within hours.</p>
+            <p class="font-bold">Visit an emergency department or urgent care center today.</p>
+        </div>
+        """
+    elif ctas_level == 4:
+        return """
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
+            <p class="font-bold text-lg">ℹ️ حالة غير ملحة (Less Urgent)</p>
+            <p>هذه الأعراض تشير إلى حالة تتطلب تقييم طبي قريباً.</p>
+            <p class="font-bold mt-2">يُنصح بزيارة مركز رعاية عاجلة أو عيادة خلال 24-48 ساعة.</p>
+            <p class="mt-2">These symptoms indicate a condition requiring medical assessment soon.</p>
+            <p class="font-bold">Consider visiting an urgent care center or clinic within 24-48 hours.</p>
+        </div>
+        """
+    else:  # CTAS 5
+        return """
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md">
+            <p class="font-bold text-lg">ℹ️ حالة غير عاجلة (Non-Urgent)</p>
+            <p>هذه الأعراض لا تشير إلى حالة طارئة في الوقت الحالي.</p>
+            <p class="font-bold mt-2">يمكنك زيارة طبيبك المعتاد للحصول على تقييم روتيني.</p>
+            <p class="mt-2">These symptoms do not indicate an emergency at this time.</p>
+            <p class="font-bold">You may visit your regular doctor for routine assessment.</p>
+        </div>
+        """
+
+@app.route('/download_self_assessment_csv', methods=['POST'])
+def download_self_assessment_csv_route():
+    data = request.form.to_dict()
+    ctas_level = calculate_ctas_logic(data)
+    
+    # Map alertness to AVPU for calculation
+    data['avpu'] = data.get('alertness', 'A')
+    
+    # Prepare data for CSV, getting text values using the self-assessment mappings
+    csv_data = {
+        'Age': data.get('patient_age', ''),
+        'Gender': get_text_from_value('patient-gender', data.get('patient_gender', ''), 'self_assessment'),
+        'Main Symptom': get_text_from_value('main-symptom', data.get('main_symptom', ''), 'self_assessment'),
+        'Symptom Details': data.get('symptom_details', ''),
+        'Alertness Level': get_text_from_value('alertness', data.get('alertness', ''), 'self_assessment'),
+        'Breathing Difficulty': get_text_from_value('breathing-difficulty', data.get('breathing_difficulty', ''), 'self_assessment'),
+        'Pain Score': data.get('pain_score', ''),
+        'Bleeding': get_text_from_value('bleeding', data.get('bleeding', ''), 'self_assessment'),
+        'Dehydration Signs': get_text_from_value('dehydration', data.get('dehydration', ''), 'self_assessment'),
+        'Fever': get_text_from_value('feverish', data.get('feverish', ''), 'self_assessment'),
+        'Recent Trauma': get_text_from_value('trauma_occurred', data.get('trauma_occurred', ''), 'self_assessment'),
+        'Diabetes': get_text_from_value('has-diabetes', data.get('has_diabetes', ''), 'self_assessment'),
+        'Blood Glucose': data.get('glucose', ''),
+        'Priority Level (Preliminary)': ctas_level,
+        'Assessment Date/Time': datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+
+    # Define CSV headers based on the keys prepared above
+    csv_headers = list(csv_data.keys())
+    csv_data_row = [csv_data[header] for header in csv_headers]
+
+    # Generate CSV in memory
+    si = io.StringIO()
+    # Add BOM for Excel UTF-8 compatibility
+    si.write('\ufeff')
+    writer = csv.writer(si)
+    writer.writerow(csv_headers)
+    writer.writerow(csv_data_row)
+
+    output = si.getvalue()
+    si.close()
+
+    # Create filename
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    filename = f"self_assessment_{timestamp}.csv"
+
+    # Return CSV as a response
+    return Response(
+        output,
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment;filename={filename}"}
+    )
+
+
+    # Import necessary libraries
+    # Added render_template
+    from flask import Flask, render_template, request, jsonify, Response, session
+    import csv
+    import io
+    from datetime import datetime
+    import os
+    import secrets
+    
+    # Initialize the Flask application
+    app = Flask(__name__)
+    
+    # Production configuration
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour
+    
+    # Security headers middleware
+    @app.after_request
+    def set_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Content-Security-Policy'] = "default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;"
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        return response
+    
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template('404.html'), 404
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        return render_template('500.html'), 500
+    
+    def safe_int(value):
+        """Helper function to safely convert to int or return None."""
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return None
+    
+    def safe_float(value):
+        """Helper function to safely convert to float or return None."""
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return None
+    
+    def calculate_ctas_logic(data):
+        # Helper function to safely convert to int or return None
+        def safe_int(value):
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                return None
+    
+        # Helper function to safely convert to float or return None
+        def safe_float(value):
+            try:
+                return float(value)
+            except (ValueError, TypeError):
+                return None
+    
+        # --- Get Input Data ---
+        age = safe_int(data.get('patient_age'))
+        complaint = data.get('chief_complaint', '')
+        hr = safe_int(data.get('heart_rate'))
+        rr = safe_int(data.get('resp_rate'))
+        spo2 = safe_int(data.get('spo2'))
+        bp_sys = safe_int(data.get('bp_systolic'))
+        temp = safe_float(data.get('temperature'))
+        gcs = safe_int(data.get('gcs_score'))
+        avpu = data.get('avpu') # From radio buttons
+        pain = safe_int(data.get('pain_score', 0))
+        resp_distress = data.get('respiratory_distress', 'none')
+        bleeding = data.get('bleeding', 'none')
+        moi = data.get('mechanism_injury', 'none')
+        glucose = safe_float(data.get('glucose')) # Glucose can be float
+        dehydration = data.get('dehydration', 'none')
+        
+        # Saudi-specific factors
+        heat_exposure = data.get('heat_exposure', 'no')
+        diabetes_status = data.get('has_diabetes', 'no')
+        hajj_pilgrim = data.get('hajj_pilgrim', 'no')
+        time_waiting = safe_int(data.get('time_waiting', 0))  # Minutes already waiting
+    
+        # Use AVPU if GCS is not provided
+        loc_indicator = gcs if gcs is not None else avpu
+    
+        ctas_level = 5 # Default to lowest acuity
+    
+        # --- Determine Age Group ---
+        age_group = 'adult' # Default
+        if age is not None:
+            if age < 1: age_group = 'infant'
+            elif age < 3: age_group = 'toddler'
+            elif age < 6: age_group = 'preschool'
+            elif age < 13: age_group = 'school_age'
+            elif age < 18: age_group = 'adolescent'
+    
+        # --- Saudi-specific heat illness check (HIGH PRIORITY) ---
+        if heat_exposure == 'yes' and temp is not None and temp >= 40.0:
+            # Heat stroke - Level 1
+            return 1
+        elif heat_exposure == 'yes' and (temp is not None and temp >= 38.5) and dehydration in ['moderate', 'severe']:
+            # Heat exhaustion - Level 2
+            return 2
+    
+        # --- Level 1: Resuscitation ---
+        is_level1 = False
+        if (gcs is not None and gcs < 9) or (gcs is None and avpu in ['U', 'P']):
+            is_level1 = True
+        elif complaint in ['cardiac_arrest', 'resp_arrest'] or \
+             resp_distress == 'severe' or \
+             (spo2 is not None and spo2 < 90) or \
+             bleeding == 'severe' or \
+             complaint in ['shock', 'major_trauma', 'anaphylaxis', 'seizure_active']:
+            is_level1 = True
+        else:
+            # Check critical vital signs (Saudi-adjusted for heat tolerance)
+            if age_group == 'infant' and ((hr is not None and (hr < 80 or hr > 200)) or (rr is not None and rr > 60)): is_level1 = True
+            elif age_group == 'toddler' and ((hr is not None and (hr < 70 or hr > 180)) or (rr is not None and rr > 50)): is_level1 = True
+            elif age_group == 'preschool' and ((hr is not None and (hr < 60 or hr > 160)) or (rr is not None and rr > 40)): is_level1 = True
+            elif age_group == 'school_age' and ((hr is not None and (hr < 50 or hr > 140)) or (rr is not None and rr > 35)): is_level1 = True
+            elif age_group in ['adolescent', 'adult'] and ((hr is not None and (hr < 40 or hr > 140)) or (rr is not None and (rr < 8 or rr > 35)) or (bp_sys is not None and bp_sys < 80)): is_level1 = True
+    
+        if is_level1: return 1
+    
+        # --- Level 2: Emergent ---
+        is_level2 = False
+        is_high_risk_vitals = False
+        is_moderate_hypoxia = (spo2 is not None and 90 <= spo2 < 92)
+    
+        # Diabetic emergency check (Saudi context - high diabetes prevalence)
+        if diabetes_status == 'yes' and glucose is not None:
+            if glucose < 3.0 or glucose > 20.0:  # Critical glucose levels
+                is_level2 = True
+            elif glucose < 4.0 or glucose > 15.0:  # Concerning glucose levels
+                is_high_risk_vitals = True
+    
+        # Check vital signs for Level 2 risk
+        if age_group == 'infant' and ((hr is not None and hr > 180) or (rr is not None and rr > 50) or (bp_sys is not None and bp_sys < 70) or is_moderate_hypoxia): is_high_risk_vitals = True
+        elif age_group == 'toddler' and ((hr is not None and hr > 160) or (rr is not None and rr > 40) or (bp_sys is not None and bp_sys < 75) or is_moderate_hypoxia): is_high_risk_vitals = True
+        elif age_group == 'preschool' and ((hr is not None and hr > 140) or (rr is not None and rr > 35) or (bp_sys is not None and bp_sys < 80) or is_moderate_hypoxia): is_high_risk_vitals = True
+        elif age_group == 'school_age' and ((hr is not None and hr > 130) or (rr is not None and rr > 30) or (bp_sys is not None and bp_sys < 85) or is_moderate_hypoxia): is_high_risk_vitals = True
+        elif age_group == 'adolescent' and ((hr is not None and hr > 120) or (rr is not None and rr > 28) or (bp_sys is not None and bp_sys < 90) or is_moderate_hypoxia): is_high_risk_vitals = True
+        elif age_group == 'adult' and ((hr is not None and (hr < 50 or hr > 120)) or (rr is not None and (rr < 10 or rr > 30)) or (bp_sys is not None and bp_sys < 90) or is_moderate_hypoxia): is_high_risk_vitals = True
+    
+    
+        if (gcs is not None and 9 <= gcs <= 13) or (gcs is None and avpu == 'V'):
+            is_level2 = True
+        elif complaint in ['chest_pain_cardiac', 'stroke', 'sepsis', 'overdose'] or \
+             resp_distress == 'moderate' or \
+             (pain is not None and pain >= 8) or complaint == 'severe_pain' or \
+             complaint in ['head_injury_moderate', 'vaginal_bleeding_heavy', 'fever_infant', 'psych_severe'] or \
+             dehydration == 'severe' or moi == 'significant':
+            is_level2 = True
+        elif is_high_risk_vitals:
+            is_level2 = True
+        
+        # Hajj-specific consideration
+        if hajj_pilgrim == 'yes' and (dehydration in ['moderate', 'severe'] or heat_exposure == 'yes'):
+            is_level2 = True
+    
+        if is_level2: return 2
+    
+        # --- Level 3: Urgent ---
+        is_level3 = False
+        is_moderate_concern_vitals = False
+    
+        # Check vital signs for Level 3 concern
+        if age_group == 'infant' and ((hr is not None and hr > 160) or (rr is not None and rr > 45)): is_moderate_concern_vitals = True
+        elif age_group == 'toddler' and ((hr is not None and hr > 150) or (rr is not None and rr > 35)): is_moderate_concern_vitals = True
+        elif age_group == 'preschool' and ((hr is not None and hr > 130) or (rr is not None and rr > 30)): is_moderate_concern_vitals = True
+        elif age_group == 'school_age' and ((hr is not None and hr > 120) or (rr is not None and rr > 25)): is_moderate_concern_vitals = True
+        elif age_group in ['adolescent', 'adult'] and ((hr is not None and (100 < hr <= 120)) or (rr is not None and 24 < rr <= 30) or (bp_sys is not None and 90 <= bp_sys < 100)): is_moderate_concern_vitals = True
+    
+    
+        if gcs is not None and gcs == 14:
+            is_level3 = True
+        elif resp_distress == 'mild' or \
+             (pain is not None and 4 <= pain <= 7) or \
+             complaint == 'abdominal_pain_severe' or \
+             bleeding == 'moderate' or dehydration == 'moderate' or \
+             (temp is not None and temp >= 39.0 and (age is None or age >= 1)): # High fever threshold
+            is_level3 = True
+        elif is_moderate_concern_vitals:
+            is_level3 = True
+        
+        # Time-based upgrade for Level 4/5 patients waiting too long
+        if time_waiting is not None and time_waiting > 120:  # Waiting over 2 hours
+            is_level3 = True
+    
+        if is_level3: return 3
+    
+        # --- Level 4: Less Urgent ---
+        is_level4 = False
+        if complaint in ['minor_trauma', 'vomiting_diarrhea_mild'] or \
+           (pain is not None and 1 <= pain <= 3) or \
+           bleeding == 'minor' or dehydration == 'mild' or \
+           (temp is not None and temp >= 38.0 and (age is None or age >= 2)): # General fever
+            is_level4 = True
+        else:
+            # Check for stable but slightly abnormal vitals not meeting L3 criteria (Example)
+            if age_group in ['adolescent', 'adult'] and ((hr is not None and 100 < hr <= 110) or (rr is not None and 20 < rr <= 24)): is_level4 = True
+    
+    
+        if is_level4: return 4
+
+
+        @app.route('/')
+        def index():
+            # Get language preference from session or default to Arabic
+            lang = session.get('language', 'ar')
+            theme = session.get('theme', 'light')
+            return render_template('mepw.html', lang=lang, theme=theme)
+        
+        @app.route('/reference')
+        def reference_page():
+            """Serves the vital sign reference page."""
+            lang = session.get('language', 'ar')
+            theme = session.get('theme', 'light')
+            return render_template('reference.html', lang=lang, theme=theme)
+        
+        @app.route('/self_diagnosis')
+        def self_diagnosis_page():
+            """Serves the patient self-diagnosis page."""
+            lang = session.get('language', 'ar')
+            theme = session.get('theme', 'light')
+            return render_template('meow.html', lang=lang, theme=theme)
+        
+        @app.route('/set_language', methods=['POST'])
+        def set_language():
+            """Set user's language preference."""
+            lang = request.json.get('language', 'ar')
+            session['language'] = lang
+            return jsonify({'status': 'success', 'language': lang})
+        
+        @app.route('/set_theme', methods=['POST'])
+        def set_theme():
+            """Set user's theme preference."""
+            theme = request.json.get('theme', 'light')
+            session['theme'] = theme
+            return jsonify({'status': 'success', 'theme': theme})
+        
+        @app.route('/calculate_ctas', methods=['POST'])
+        def calculate_ctas_route():
+            try:
+                data = request.form.to_dict()
+                ctas_level = calculate_ctas_logic(data)
+        
+                # Prepare summary data for JSON response
+                summary_data = {
+                    'name': data.get('patient_name', 'N/A'),
+                    'age': data.get('patient_age', 'N/A'),
+                    'gender': get_text_from_value('patient-gender', data.get('patient_gender'), 'professional'),
+                    'id': data.get('patient_id', 'N/A'),
+                    'complaint': get_text_from_value('chief-complaint', data.get('chief_complaint'), 'professional'),
+                    'complaint_details': data.get('complaint_details', 'N/A'),
+                    'vitals': f"HR: {data.get('heart_rate', 'N/A')}, RR: {data.get('resp_rate', 'N/A')}, SpO2: {data.get('spo2', 'N/A')}%, BP: {data.get('bp_systolic', 'N/A')}/{data.get('bp_diastolic', 'N/A')}, Temp: {data.get('temperature', 'N/A')}°C",
+                    'loc': f"GCS: {data.get('gcs_score', 'N/A')}" + (f" (AVPU: {data.get('avpu')})" if data.get('avpu') else '') if data.get('gcs_score') else (f"AVPU: {data.get('avpu')}" if data.get('avpu') else 'N/A'),
+                    'pain': data.get('pain_score', '0'),
+                    'resp_distress': get_text_from_value('respiratory-distress', data.get('respiratory_distress'), 'professional'),
+                    'bleeding': get_text_from_value('bleeding', data.get('bleeding'), 'professional'),
+                    'moi': get_text_from_value('mechanism-injury', data.get('mechanism_injury'), 'professional'),
+                    'glucose': data.get('glucose', 'N/A'),
+                    'dehydration': get_text_from_value('dehydration', data.get('dehydration'), 'professional'),
+                    'heat_exposure': data.get('heat_exposure', 'N/A'),
+                    'diabetes': data.get('has_diabetes', 'N/A'),
+                    'ctas_level': ctas_level,
+                    'wait_time_estimate': get_wait_time_estimate(ctas_level)
+                }
+                return jsonify(summary_data)
+            except Exception as e:
+                app.logger.error(f"Error in calculate_ctas: {str(e)}")
+                return jsonify({'error': 'An error occurred processing your request'}), 500
+        
+        def get_wait_time_estimate(ctas_level):
+            """Get estimated wait time based on CTAS level."""
+            wait_times = {
+                1: "فوري (Immediate)",
+                2: "≤ 15 دقيقة (≤ 15 minutes)",
+                3: "≤ 30 دقيقة (≤ 30 minutes)",
+                4: "≤ 60 دقيقة (≤ 60 minutes)",
+                5: "≤ 120 دقيقة (≤ 120 minutes)"
+            }
+            return wait_times.get(ctas_level, "N/A")
+        
+        @app.route('/download_csv', methods=['POST'])
+        def download_csv_route():
+
+
+        ============================
+
+        <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - الصفحة غير موجودة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen flex items-center justify-center">
+    <div class="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+        <h1 class="text-6xl font-bold text-red-500 mb-4">404</h1>
+        <h2 class="text-2xl font-semibold mb-4">الصفحة غير موجودة</h2>
+        <p class="text-gray-600 mb-2">Page Not Found</p>
+        <p class="text-gray-600 mb-6">عذراً، الصفحة التي تبحث عنها غير موجودة.</p>
+        <p class="text-gray-600 mb-8">Sorry, the page you are looking for does not exist.</p>
+        <a href="/" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-150 ease-in-out">
+            العودة للصفحة الرئيسية / Go Home
+        </a>
+    </div>
+</body>
+</html>
+
+================================
+mepw.html
+
+<!DOCTYPE html>
+<html lang="{{ lang or 'ar' }}" dir="{{ 'ltr' if lang == 'en' else 'rtl' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{ 'Pre-Hospital Examination Tool' if lang == 'en' else 'أداة فحص ما قبل المستشفى' }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        /* Apply Inter font globally */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for hiding sections */
+        .hidden-section {
+            display: none;
+        }
+        /* Dark mode styles */
+        .dark {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .dark .bg-white {
+            background-color: #2d2d2d;
+        }
+        .dark .bg-gray-100 {
+            background-color: #1a1a1a;
+        }
+        .dark .bg-gray-50 {
+            background-color: #2d2d2d;
+        }
+        .dark .text-gray-900 {
+            color: #e0e0e0;
+        }
+        .dark .text-gray-700 {
+            color: #b0b0b0;
+        }
+        .dark .text-gray-600 {
+            color: #9a9a9a;
+        }
+        .dark .border-gray-300 {
+            border-color: #4a4a4a;
+        }
+        .dark input, .dark select, .dark textarea {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border-color: #4a4a4a;
+        }
+        /* Basic styling for printable view */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            button {
+                display: none; /* Hide buttons in print view */
+            }
+        }
+        /* Custom focus ring style */
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px #3b82f6; /* Blue focus ring */
+            border-color: #3b82f6;
+        }
+        /* Mobile responsive improvements */
+        @media (max-width: 640px) {
+            .container {
+                padding: 0.5rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            h2 {
+                font-size: 1.25rem;
+            }
+            h3 {
+                font-size: 1.1rem;
+            }
+            button {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+        /* Larger text for accessibility */
+        label, legend {
+            font-size: 1.1rem; /* Slightly larger labels */
+        }
+        input, select, button, textarea {
+            font-size: 1rem; /* Ensure form elements are readable */
+            padding: 0.75rem 1rem; /* Increase padding for easier interaction */
+            border-radius: 0.5rem; /* Consistent rounded corners */
+        }
+        button {
+            transition: background-color 0.2s ease-in-out;
+        }
+        /* CTAS Level Colors (5 Levels) */
+        .ctas-level-1 { color: #dc2626; } /* Red-600 */
+        .ctas-level-2 { color: #f97316; } /* Orange-600 */
+        .ctas-level-3 { color: #f59e0b; } /* Amber-500 */
+        .ctas-level-4 { color: #16a34a; } /* Green-600 */
+        .ctas-level-5 { color: #3b82f6; } /* Blue-500 */
+        .ctas-default { color: #4b5563; } /* Gray-600 */
+
+    </style>
+</head>
+<body class="{{ 'dark' if theme == 'dark' else '' }} bg-gray-100 text-gray-900">
+    <!-- Language and Theme Toggle -->
+    <div class="fixed top-4 {{ 'left-4' if lang == 'en' else 'right-4' }} z-50 flex gap-2">
+        <button onclick="toggleLanguage()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg shadow-md transition duration-150 ease-in-out text-sm">
+            <i class="fas fa-language"></i> {{ 'AR' if lang == 'en' else 'EN' }}
+        </button>
+        <button onclick="toggleTheme()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg shadow-md transition duration-150 ease-in-out text-sm">
+            <i class="fas {{ 'fa-sun' if theme == 'dark' else 'fa-moon' }}"></i>
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl bg-white shadow-lg rounded-lg mt-10">
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-blue-600 mb-4 md:mb-8">{{ 'Pre-Hospital Examination Tool' if lang == 'en' else 'أداة فحص ما قبل المستشفى' }}</h1>
+        <h2 class="text-lg md:text-xl text-center text-gray-600 mb-4 md:mb-8">{{ 'CTAS-Based Triage System for Saudi Arabia' if lang == 'en' else 'نظام الفرز المبني على CTAS للمملكة العربية السعودية' }}</h2>
+        <div class="text-center mb-4 space-x-4">
+            <a href="/self_diagnosis" class="text-blue-500 hover:text-blue-700 underline text-sm md:text-base">{{ 'Self-Assessment Tool' if lang == 'en' else 'أداة التقييم الذاتي' }}</a>
+            <a href="/reference" class="text-blue-500 hover:text-blue-700 underline text-sm md:text-base">{{ 'Reference Info' if lang == 'en' else 'معلومات مرجعية' }}</a>
+        </div>
+
+        <form id="triage-form">
+
+            <section id="step-1" class="step-section border-b pb-8 mb-8">
+                <h3 class="text-xl md:text-2xl font-semibold mb-6 text-gray-700 {{ 'border-l-4' if lang == 'en' else 'border-r-4' }} border-blue-500 {{ 'pl-4' if lang == 'en' else 'pr-4' }}">{{ 'Step 1: Patient Information' if lang == 'en' else 'الخطوة 1: معلومات المريض' }}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div>
+                        <label for="patient-name" class="block text-gray-700 font-medium mb-2">{{ 'Patient Name:' if lang == 'en' else 'اسم المريض:' }}</label>
+                        <input type="text" id="patient-name" name="patient_name" class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="patient-age" class="block text-gray-700 font-medium mb-2">{{ 'Age:' if lang == 'en' else 'العمر:' }}</label>
+                        <input type="number" id="patient-age" name="patient_age" min="0" class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="patient-gender" class="block text-gray-700 font-medium mb-2">{{ 'Gender:' if lang == 'en' else 'الجنس:' }}</label>
+                        <select id="patient-gender" name="patient_gender" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">{{ 'Select' if lang == 'en' else 'اختر' }}</option>
+                            <option value="male">{{ 'Male' if lang == 'en' else 'ذكر' }}</option>
+                            <option value="female">{{ 'Female' if lang == 'en' else 'أنثى' }}</option>
+                            <option value="other">{{ 'Other' if lang == 'en' else 'آخر' }}</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="patient-id" class="block text-gray-700 font-medium mb-2">{{ 'ID/MRN (Optional):' if lang == 'en' else 'رقم الهوية/الملف (اختياري):' }}</label>
+                        <input type="text" id="patient-id" name="patient_id" class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <!-- Saudi-specific fields -->
+                    <div>
+                        <label for="has-diabetes" class="block text-gray-700 font-medium mb-2">{{ 'Diabetic Patient?' if lang == 'en' else 'مريض سكري؟' }}</label>
+                        <select id="has-diabetes" name="has_diabetes" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                            <option value="no">{{ 'No' if lang == 'en' else 'لا' }}</option>
+                            <option value="yes">{{ 'Yes' if lang == 'en' else 'نعم' }}</option>
+                            <option value="unknown">{{ 'Unknown' if lang == 'en' else 'غير معروف' }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="hajj-pilgrim" class="block text-gray-700 font-medium mb-2">{{ 'Hajj/Umrah Pilgrim?' if lang == 'en' else 'حاج/معتمر؟' }}</label>
+                        <select id="hajj-pilgrim" name="hajj_pilgrim" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                            <option value="no">{{ 'No' if lang == 'en' else 'لا' }}</option>
+                            <option value="yes">{{ 'Yes' if lang == 'en' else 'نعم' }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button type="button" onclick="nextStep(1)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 md:px-8 rounded-lg shadow transition duration-150 ease-in-out">
+                        {{ 'Next' if lang == 'en' else 'التالي' }} &rarr;
+                    </button>
+                </div>
+            </section>
+
+// ... existing code ...
+</body>
+</html>
+
+
+====================================
+
+// ... existing code ...
+                         <div>
+                            <label for="dehydration" class="block text-gray-700 font-medium mb-2">علامات الجفاف (Dehydration Signs):</label>
+                            <select id="dehydration" name="dehydration" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="none">لا يوجد (None)</option>
+                                <option value="mild">خفيف (Mild - e.g., thirsty)</option>
+                                <option value="moderate">متوسط (Moderate - e.g., dry mucous membranes)</option>
+                                <option value="severe">شديد (Severe - e.g., poor turgor, lethargy)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="heat-exposure" class="block text-gray-700 font-medium mb-2">{{ 'Heat Exposure?' if lang == 'en' else 'التعرض للحرارة؟' }}</label>
+                            <select id="heat-exposure" name="heat_exposure" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="no">{{ 'No' if lang == 'en' else 'لا' }}</option>
+                                <option value="yes">{{ 'Yes' if lang == 'en' else 'نعم' }}</option>
+                            </select>
+                        </div>
+                        <div id="glucose-field" class="hidden">
+                            <label for="glucose" class="block text-gray-700 font-medium mb-2">{{ 'Blood Glucose (mmol/L):' if lang == 'en' else 'سكر الدم (mmol/L):' }}</label>
+                            <input type="number" step="0.1" id="glucose" name="glucose" class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                    </div>
+                </fieldset>
+// ... existing code ...
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4; // 4 steps total
+        let currentLang = '{{ lang or "ar" }}';
+        let currentTheme = '{{ theme or "light" }}';
+
+        // Language and theme switching functions
+        function toggleLanguage() {
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            fetch('/set_language', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({language: newLang})
+            }).then(() => {
+                window.location.reload();
+            });
+        }
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            fetch('/set_theme', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({theme: newTheme})
+            }).then(() => {
+                window.location.reload();
+            });
+        }
+
+        // Show glucose field when diabetes is selected
+        document.getElementById('has-diabetes').addEventListener('change', function() {
+            const glucoseField = document.getElementById('glucose-field');
+            if (this.value === 'yes') {
+                glucoseField.classList.remove('hidden');
+            } else {
+                glucoseField.classList.add('hidden');
+                document.getElementById('glucose').value = '';
+            }
+        });
+
+        function nextStep(step) {
+// ... existing code ...
+
+====================================
+
+
+config file 
+
+# Pre-Hospital Triage System Configuration
+# نظام الفرز ما قبل المستشفى - إعدادات
+
+# Flask Configuration
+SECRET_KEY=your-secret-key-here-change-this-in-production-minimum-32-characters
+FLASK_ENV=production
+
+# Security Settings
+SESSION_COOKIE_SECURE=True
+SESSION_COOKIE_HTTPONLY=True
+SESSION_COOKIE_SAMESITE=Lax
+PERMANENT_SESSION_LIFETIME=3600
+
+# Application Settings
+DEFAULT_LANGUAGE=ar
+SUPPORTED_LANGUAGES=ar,en
+DEFAULT_THEME=light
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=8000
+WORKERS=4
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FILE=app.log
+
+# Usage Instructions:
+# 1. Copy this file to .env in production
+# 2. Change SECRET_KEY to a random 32+ character string
+# 3. Set FLASK_ENV=production for production deployment
+# 4. For development, you can set FLASK_ENV=development
+
+================================
+
+delete the hajj umrah lines =
+
+<div>
+    <label for="hajj-pilgrim" class="block text-gray-700 font-medium mb-2">{{ 'Hajj/Umrah Pilgrim?' if lang == 'en' else 'حاج/معتمر؟' }}</label>
+    <select id="hajj-pilgrim" name="hajj_pilgrim" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+        <option value="no">{{ 'No' if lang == 'en' else 'لا' }}</option>
+        <option value="yes">{{ 'Yes' if lang == 'en' else 'نعم' }}</option>
+    </select>
+</div>
+
+
+==================\
+
+
+@app.route('/download_self_assessment_csv', methods=['POST'])
+def download_self_assessment_csv_route():
+    data = request.form.to_dict()
+    ctas_level = calculate_ctas_logic(data)
+    
+    # Map alertness to AVPU for calculation
+    data['avpu'] = data.get('alertness', 'A')
+    
+    # Prepare data for CSV, getting text values using the self-assessment mappings
+    csv_data = {
+        'Age': data.get('patient_age', ''),
+        'Gender': get_text_from_value('patient-gender', data.get('patient_gender', ''), 'self_assessment'),
+        'Main Symptom': get_text_from_value('main-symptom', data.get('main_symptom', ''), 'self_assessment'),
+        'Symptom Details': data.get('symptom_details', ''),
+        'Alertness Level': get_text_from_value('alertness', data.get('alertness', ''), 'self_assessment'),
+        'Breathing Difficulty': get_text_from_value('breathing-difficulty', data.get('breathing_difficulty', ''), 'self_assessment'),
+        'Pain Score': data.get('pain_score', ''),
+        'Bleeding': get_text_from_value('bleeding', data.get('bleeding', ''), 'self_assessment'),
+        'Dehydration Signs': get_text_from_value('dehydration', data.get('dehydration', ''), 'self_assessment'),
+        'Fever': get_text_from_value('feverish', data.get('feverish', ''), 'self_assessment'),
+        'Recent Trauma': get_text_from_value('trauma_occurred', data.get('trauma_occurred', ''), 'self_assessment'),
+        'Diabetes': get_text_from_value('has-diabetes', data.get('has_diabetes', ''), 'self_assessment'),
+        'Blood Glucose': data.get('glucose', ''),
+        'Priority Level (Preliminary)': ctas_level,
+        'Assessment Date/Time': datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+
+    # Define CSV headers based on the keys prepared above
+    csv_headers = list(csv_data.keys())
+    csv_data_row = [csv_data[header] for header in csv_headers]
+
+    # Generate CSV in memory
+    si = io.StringIO()
+    writer = csv.writer(si)
+    writer.writerow(csv_headers)
+    writer.writerow(csv_data_row)
+
+    output = si.getvalue()
+    si.close()
+
+    # Create filename
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    filename = f"self_assessment_{timestamp}.csv"
+
+    # Return CSV as a response with proper UTF-8 encoding
+    return Response(
+        output,
+        mimetype="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f"attachment;filename={filename}"}
+    )=============================
+
+
+    
+
