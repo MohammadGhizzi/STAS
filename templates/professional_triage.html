@@ -1,23 +1,17 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أداة فحص المرضى - CTAS Triage Tool</title>
+    <title>{{ 'CTAS Triage Tool' if lang == 'en' else 'أداة فحص المرضى' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <script>
-        tailwind.config = {
-            darkMode: 'class'
-        }
-    </script>
     <style>
         [dir="rtl"] { text-align: right; }
         [dir="ltr"] { text-align: left; }
-        .dark { background-color: #1a1a1a; color: #ffffff; }
         .ctas-level-1 { background-color: #ef4444; color: white; }
         .ctas-level-2 { background-color: #f97316; color: white; }
         .ctas-level-3 { background-color: #f59e0b; color: white; }
@@ -26,33 +20,6 @@
         /* Style for hiding sections */
         .hidden-section {
             display: none;
-        }
-        /* Dark mode styles */
-        .dark .bg-white {
-            background-color: #2d2d2d;
-        }
-        .dark .bg-gray-100 {
-            background-color: #1a1a1a;
-        }
-        .dark .bg-gray-50 {
-            background-color: #2d2d2d;
-        }
-        .dark .text-gray-900 {
-            color: #e0e0e0;
-        }
-        .dark .text-gray-700 {
-            color: #b0b0b0;
-        }
-        .dark .text-gray-600 {
-            color: #9a9a9a;
-        }
-        .dark .border-gray-300 {
-            border-color: #4a4a4a;
-        }
-        .dark input, .dark select, .dark textarea {
-            background-color: #3a3a3a;
-            color: #e0e0e0;
-            border-color: #4a4a4a;
         }
         /* Basic styling for printable view */
         @media print {
@@ -69,14 +36,14 @@
                 width: 100%;
             }
             button {
-                display: none; /* Hide buttons in print view */
+                display: none;
             }
         }
         /* Custom focus ring style */
         input:focus, select:focus, textarea:focus {
             outline: 2px solid transparent;
             outline-offset: 2px;
-            box-shadow: 0 0 0 2px #3b82f6; /* Blue focus ring */
+            box-shadow: 0 0 0 2px #3b82f6;
             border-color: #3b82f6;
         }
         /* Mobile responsive improvements */
@@ -100,17 +67,17 @@
         }
         /* Larger text for accessibility */
         label, legend {
-            font-size: 1.1rem; /* Slightly larger labels */
+            font-size: 1.1rem;
         }
         input, select, button, textarea {
-            font-size: 1rem; /* Ensure form elements are readable */
-            padding: 0.75rem 1rem; /* Increase padding for easier interaction */
-            border-radius: 0.5rem; /* Consistent rounded corners */
-            min-height: 44px; /* Minimum touch target size for accessibility */
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            min-height: 44px;
         }
         button {
             transition: background-color 0.2s ease-in-out;
-            min-height: 44px; /* Minimum touch target size */
+            min-height: 44px;
         }
         /* Enhanced accessibility improvements */
         .sr-only {
@@ -144,42 +111,38 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+<body class="bg-gray-50 transition-colors duration-300">
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
-                <h1 class="text-3xl font-bold text-gray-800 dark:text-white">
-                    أداة فحص المرضى المتقدمة
+                <h1 class="text-3xl font-bold text-gray-800">
+                    {{ 'Advanced Patient Assessment Tool' if lang == 'en' else 'أداة فحص المرضى المتقدمة' }}
                 </h1>
-                <div class="flex gap-2">
-                    <button onclick="toggleLanguage()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-                        <span id="langButton">EN</span>
-                    </button>
-                    <button onclick="toggleTheme()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">
-                        <span id="themeButton">🌙</span>
-                    </button>
-                </div>
+                <button onclick="toggleLanguage()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                    <span id="langButton">{{ 'عربي' if lang == 'en' else 'EN' }}</span>
+                </button>
             </div>
-            <p class="text-lg text-gray-600 dark:text-gray-300 mb-4">
-                أداة تقييم المرضى باستخدام نظام CTAS (المقياس الكندي للفرز وحدة الرعاية)
-            </p>
-            <p class="text-lg text-gray-600 dark:text-gray-300 mb-4" dir="ltr">
-                Advanced Patient Assessment Tool using CTAS (Canadian Triage and Acuity Scale)
+            <p class="text-lg text-gray-600 mb-4">
+                {% if lang == 'en' %}
+                    Advanced Patient Assessment Tool using CTAS (Canadian Triage and Acuity Scale)
+                {% else %}
+                    أداة تقييم المرضى باستخدام نظام CTAS (المقياس الكندي للفرز وحدة الرعاية)
+                {% endif %}
             </p>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                <a href="/self_diagnosis" class="block p-4 bg-green-100 dark:bg-green-800 rounded-lg hover:bg-green-200 dark:hover:bg-green-700 transition-colors">
-                    <h3 class="font-bold text-green-800 dark:text-green-200">الفحص الذاتي</h3>
-                    <p class="text-green-600 dark:text-green-300 text-sm">للمرضى - تقييم الأعراض</p>
+                <a href="/self_diagnosis" class="block p-4 bg-green-100 rounded-lg hover:bg-green-200 transition-colors">
+                    <h3 class="font-bold text-green-800">{{ 'Self Assessment' if lang == 'en' else 'الفحص الذاتي' }}</h3>
+                    <p class="text-green-600 text-sm">{{ 'For patients - symptom assessment' if lang == 'en' else 'للمرضى - تقييم الأعراض' }}</p>
                 </a>
-                <a href="/reference" class="block p-4 bg-blue-100 dark:bg-blue-800 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors">
-                    <h3 class="font-bold text-blue-800 dark:text-blue-200">مرجع العلامات الحيوية</h3>
-                    <p class="text-blue-600 dark:text-blue-300 text-sm">القيم الطبيعية حسب العمر</p>
+                <a href="/reference" class="block p-4 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors">
+                    <h3 class="font-bold text-blue-800">{{ 'Vital Signs Reference' if lang == 'en' else 'مرجع العلامات الحيوية' }}</h3>
+                    <p class="text-blue-600 text-sm">{{ 'Normal values by age' if lang == 'en' else 'القيم الطبيعية حسب العمر' }}</p>
                 </a>
-                <a href="/health" class="block p-4 bg-purple-100 dark:bg-purple-800 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-700 transition-colors">
-                    <h3 class="font-bold text-purple-800 dark:text-purple-200">حالة النظام</h3>
-                    <p class="text-purple-600 dark:text-purple-300 text-sm">فحص صحة الخدمة</p>
+                <a href="/health" class="block p-4 bg-purple-100 rounded-lg hover:bg-purple-200 transition-colors">
+                    <h3 class="font-bold text-purple-800">{{ 'System Status' if lang == 'en' else 'حالة النظام' }}</h3>
+                    <p class="text-purple-600 text-sm">{{ 'Service health check' if lang == 'en' else 'فحص صحة الخدمة' }}</p>
                 </a>
             </div>
         </div>
@@ -187,7 +150,7 @@
         <form id="triage-form" role="form" aria-label="Medical Triage Assessment Form">
 
             <section id="step-1" class="step-section border-b pb-8 mb-8" aria-labelledby="step-1-heading">
-                <h3 id="step-1-heading" class="text-2xl font-semibold mb-6 text-gray-700 border-r-4 border-blue-500 pr-4">{{ 'Step 1: Patient Information' if lang == 'en' else 'الخطوة 1: معلومات المريض' }}</h3>
+                <h3 id="step-1-heading" class="text-2xl font-semibold mb-6 text-gray-700 border-{{ 'l' if lang == 'en' else 'r' }}-4 border-blue-500 p{{ 'l' if lang == 'en' else 'r' }}-4">{{ 'Step 1: Patient Information' if lang == 'en' else 'الخطوة 1: معلومات المريض' }}</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="patient-name" class="block text-gray-700 font-medium mb-2">{{ 'Patient Name:' if lang == 'en' else 'اسم المريض:' }}</label>
@@ -227,37 +190,70 @@
                     <button type="button" onclick="nextStep(1)" 
                             class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
                             aria-label="{{ 'Proceed to next step' if lang == 'en' else 'الانتقال للخطوة التالية' }}">
-                        {{ 'Next' if lang == 'en' else 'التالي' }} &rarr;
+                        {{ 'Next' if lang == 'en' else 'التالي' }} {{ '→' if lang == 'en' else '←' }}
                     </button>
                 </div>
             </section>
 
             <section id="step-2" class="step-section hidden-section border-b pb-8 mb-8" aria-labelledby="step-2-heading">
-                <h3 id="step-2-heading" class="text-2xl font-semibold mb-6 text-gray-700 border-r-4 border-blue-500 pr-4">{{ 'Step 2: Chief Complaint' if lang == 'en' else 'الخطوة 2: الشكوى الرئيسية' }}</h3>
+                <h3 id="step-2-heading" class="text-2xl font-semibold mb-6 text-gray-700 border-{{ 'l' if lang == 'en' else 'r' }}-4 border-blue-500 p{{ 'l' if lang == 'en' else 'r' }}-4">{{ 'Step 2: Chief Complaint' if lang == 'en' else 'الخطوة 2: الشكوى الرئيسية' }}</h3>
                  <div class="mb-6">
                     <label for="chief-complaint" class="block text-gray-700 font-medium mb-2">{{ 'Select Chief Complaint:' if lang == 'en' else 'اختر الشكوى الرئيسية:' }}</label>
                     <select id="chief-complaint" name="chief_complaint" 
                             class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500"
                             aria-describedby="chief-complaint-help">
                         <option value="">{{ '-- Select Complaint --' if lang == 'en' else '-- اختر الشكوى --' }}</option>
-                        <!-- Basic STAS Categories - Updated from CTAS -->
-                        <option value="cardiac_arrest">{{ 'Cardiac Arrest / VSA' if lang == 'en' else 'توقف القلب (Cardiac Arrest / VSA)' }}</option>
-                        <option value="resp_arrest">{{ 'Respiratory Arrest' if lang == 'en' else 'توقف التنفس (Respiratory Arrest)' }}</option>
-                        <option value="major_trauma">{{ 'Major Trauma' if lang == 'en' else 'إصابة بليغة (Major Trauma)' }}</option>
-                        <option value="chest_pain_cardiac">{{ 'Chest Pain - Cardiac?' if lang == 'en' else 'ألم في الصدر (يشتبه بالقلب) (Chest Pain - Cardiac?)' }}</option>
-                        <option value="resp_distress_severe">{{ 'Resp Distress - Severe' if lang == 'en' else 'ضيق تنفس حاد (Resp Distress - Severe)' }}</option>
-                        <option value="shock">{{ 'Shock' if lang == 'en' else 'صدمة (Shock)' }}</option>
-                        <option value="loc_decreased">{{ 'LOC Decreased' if lang == 'en' else 'انخفاض مستوى الوعي (LOC Decreased)' }}</option>
-                        <option value="seizure_active">{{ 'Seizure - Active' if lang == 'en' else 'تشنج نشط (Seizure - Active)' }}</option>
-                        <option value="stroke">{{ 'Stroke / CVA' if lang == 'en' else 'جلطة دماغية (Stroke / CVA)' }}</option>
-                        <option value="anaphylaxis">{{ 'Anaphylaxis' if lang == 'en' else 'حساسية مفرطة (Anaphylaxis)' }}</option>
-                        <option value="overdose">{{ 'Overdose' if lang == 'en' else 'جرعة زائدة (Overdose)' }}</option>
-                        <option value="sepsis">{{ 'Sepsis' if lang == 'en' else 'تسمم الدم (Sepsis)' }}</option>
-                        <option value="severe_pain">{{ 'Severe Pain' if lang == 'en' else 'ألم شديد (Severe Pain)' }}</option>
-                        <option value="resp_distress_moderate">{{ 'Resp Distress - Moderate' if lang == 'en' else 'ضيق تنفس متوسط (Resp Distress - Moderate)' }}</option>
-                        <option value="abdominal_pain_severe">{{ 'Abdominal Pain - Severe' if lang == 'en' else 'ألم بطن شديد (Abdominal Pain - Severe)' }}</option>
-                        <option value="head_injury_moderate">{{ 'Head Injury - Moderate' if lang == 'en' else 'إصابة رأس متوسطة (Head Injury - Moderate)' }}</option>
-                        <option value="vaginal_bleeding_heavy">{{ 'Vaginal Bleeding - Heavy' if lang == 'en' else 'نزيف مهبلي غزير (Vaginal Bleeding - Heavy)' }}</option>
+                        {% if lang == 'en' %}
+                        <option value="cardiac_arrest">Cardiac Arrest / VSA</option>
+                        <option value="resp_arrest">Respiratory Arrest</option>
+                        <option value="major_trauma">Major Trauma</option>
+                        <option value="chest_pain_cardiac">Chest Pain - Cardiac?</option>
+                        <option value="resp_distress_severe">Resp Distress - Severe</option>
+                        <option value="shock">Shock</option>
+                        <option value="loc_decreased">LOC Decreased</option>
+                        <option value="seizure_active">Seizure - Active</option>
+                        <option value="stroke">Stroke / CVA</option>
+                        <option value="anaphylaxis">Anaphylaxis</option>
+                        <option value="overdose">Overdose</option>
+                        <option value="sepsis">Sepsis</option>
+                        <option value="severe_pain">Severe Pain</option>
+                        <option value="resp_distress_moderate">Resp Distress - Moderate</option>
+                        <option value="abdominal_pain_severe">Abdominal Pain - Severe</option>
+                        <option value="head_injury_moderate">Head Injury - Moderate</option>
+                        <option value="vaginal_bleeding_heavy">Vaginal Bleeding - Heavy</option>
+                        <option value="fever_infant">Fever - Infant < 3mo</option>
+                        <option value="psych_severe">Psychiatric - Severe</option>
+                        <option value="minor_trauma">Minor Trauma</option>
+                        <option value="mild_pain">Mild Pain</option>
+                        <option value="vomiting_diarrhea_mild">Vomiting/Diarrhea - Mild</option>
+                        <option value="rash">Rash</option>
+                        <option value="other">Other - specify below</option>
+                        {% else %}
+                        <option value="cardiac_arrest">توقف القلب</option>
+                        <option value="resp_arrest">توقف التنفس</option>
+                        <option value="major_trauma">إصابة بليغة</option>
+                        <option value="chest_pain_cardiac">ألم في الصدر (يشتبه بالقلب)</option>
+                        <option value="resp_distress_severe">ضيق تنفس حاد</option>
+                        <option value="shock">صدمة</option>
+                        <option value="loc_decreased">انخفاض مستوى الوعي</option>
+                        <option value="seizure_active">تشنج نشط</option>
+                        <option value="stroke">جلطة دماغية</option>
+                        <option value="anaphylaxis">حساسية مفرطة</option>
+                        <option value="overdose">جرعة زائدة</option>
+                        <option value="sepsis">تسمم الدم</option>
+                        <option value="severe_pain">ألم شديد</option>
+                        <option value="resp_distress_moderate">ضيق تنفس متوسط</option>
+                        <option value="abdominal_pain_severe">ألم بطن شديد</option>
+                        <option value="head_injury_moderate">إصابة رأس متوسطة</option>
+                        <option value="vaginal_bleeding_heavy">نزيف مهبلي غزير</option>
+                        <option value="fever_infant">حمى (رضيع < 3 أشهر)</option>
+                        <option value="psych_severe">حالة نفسية حادة</option>
+                        <option value="minor_trauma">إصابة طفيفة</option>
+                        <option value="mild_pain">ألم خفيف</option>
+                        <option value="vomiting_diarrhea_mild">قيء/إسهال خفيف</option>
+                        <option value="rash">طفح جلدي</option>
+                        <option value="other">أخرى</option>
+                        {% endif %}
                     </select>
                     <span id="chief-complaint-help" class="sr-only">{{ 'Select the chief complaint' if lang == 'en' else 'اختر الشكوى الرئيسية' }}</span>
                 </div>
@@ -271,20 +267,19 @@
                     <button type="button" onclick="prevStep(2)" 
                             class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500"
                             aria-label="{{ 'Go back to previous step' if lang == 'en' else 'الرجوع للخطوة السابقة' }}">
-                        &larr; {{ 'Previous' if lang == 'en' else 'السابق' }}
+                        {{ '←' if lang == 'en' else '→' }} {{ 'Previous' if lang == 'en' else 'السابق' }}
                     </button>
                     <button type="button" onclick="nextStep(2)" 
                             class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
                             aria-label="{{ 'Proceed to next step' if lang == 'en' else 'الانتقال للخطوة التالية' }}">
-                        {{ 'Next' if lang == 'en' else 'التالي' }} &rarr;
+                        {{ 'Next' if lang == 'en' else 'التالي' }} {{ '→' if lang == 'en' else '←' }}
                     </button>
                 </div>
             </section>
 
             <section id="step-3" class="step-section hidden-section border-b pb-8 mb-8" aria-labelledby="step-3-heading">
-                <h3 id="step-3-heading" class="text-2xl font-semibold mb-6 text-gray-700 border-r-4 border-blue-500 pr-4">{{ 'Step 3: Initial Indicators (Vital Signs, LOC, Pain)' if lang == 'en' else 'الخطوة 3: المؤشرات الأولية (العلامات الحيوية، الوعي، الألم)' }}</h3>
+                <h3 id="step-3-heading" class="text-2xl font-semibold mb-6 text-gray-700 border-{{ 'l' if lang == 'en' else 'r' }}-4 border-blue-500 p{{ 'l' if lang == 'en' else 'r' }}-4">{{ 'Step 3: Initial Indicators (Vital Signs, LOC, Pain)' if lang == 'en' else 'الخطوة 3: المؤشرات الأولية (العلامات الحيوية، الوعي، الألم)' }}</h3>
 
-                {/* Vital Signs - Fields confirmed relevant by SRCA Scope Appendix B/C */}
                 <fieldset class="mb-6 border p-4 rounded-md">
                     <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">{{ 'Vital Signs' if lang == 'en' else 'العلامات الحيوية' }}</legend>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -301,53 +296,51 @@
                             <input type="number" id="spo2" name="spo2" min="0" max="100" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         <div>
-                            <label for="bp-systolic" class="block text-gray-700 font-medium mb-1">{{ 'BP Systolic:' if lang == 'en' else 'ضغط الدم الانقباضي (BP Sys):' }}</label>
+                            <label for="bp-systolic" class="block text-gray-700 font-medium mb-1">{{ 'BP Systolic:' if lang == 'en' else 'ضغط الدم الانقباضي:' }}</label>
                             <input type="number" id="bp-systolic" name="bp_systolic" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                          <div>
-                            <label for="bp-diastolic" class="block text-gray-700 font-medium mb-1">{{ 'BP Diastolic:' if lang == 'en' else 'ضغط الدم الانبساطي (BP Dia):' }}</label>
+                            <label for="bp-diastolic" class="block text-gray-700 font-medium mb-1">{{ 'BP Diastolic:' if lang == 'en' else 'ضغط الدم الانبساطي:' }}</label>
                             <input type="number" id="bp-diastolic" name="bp_diastolic" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         <div>
-                            <label for="temperature" class="block text-gray-700 font-medium mb-1">{{ 'Temperature (°C):' if lang == 'en' else 'درجة الحرارة (Temp °C):' }}</label>
+                            <label for="temperature" class="block text-gray-700 font-medium mb-1">{{ 'Temperature (°C):' if lang == 'en' else 'درجة الحرارة (°C):' }}</label>
                             <input type="number" step="0.1" id="temperature" name="temperature" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                     </div>
                 </fieldset>
 
-                {/* Level of Consciousness (LOC) - GCS/AVPU confirmed relevant by SRCA Scope Appendix C */}
                  <fieldset class="mb-6 border p-4 rounded-md">
                     <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">{{ 'Level of Consciousness' if lang == 'en' else 'مستوى الوعي' }}</legend>
                     <div class="mb-4">
-                        <label for="gcs-score" class="block text-gray-700 font-medium mb-1">{{ 'GCS Score (3-15):' if lang == 'en' else 'مقياس غلاسكو للغيبوبة (GCS Score - 3-15):' }}</label>
+                        <label for="gcs-score" class="block text-gray-700 font-medium mb-1">{{ 'GCS Score (3-15):' if lang == 'en' else 'مقياس غلاسكو للغيبوبة (3-15):' }}</label>
                         <input type="number" id="gcs-score" name="gcs_score" min="3" max="15" class="w-full md:w-1/2 border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                          <p class="text-sm text-gray-500 mt-1">{{ 'Or use AVPU:' if lang == 'en' else 'أو استخدم AVPU:' }}</p>
                     </div>
                     <div class="flex flex-wrap gap-4">
                         <label class="inline-flex items-center">
                             <input type="radio" name="avpu" value="A" class="form-radio text-blue-600 h-5 w-5">
-                            <span class="ms-2 text-lg">{{ 'A - Alert' if lang == 'en' else 'A - منتبه' }}</span>
+                            <span class="{{ 'ml-2' if lang == 'en' else 'mr-2' }} text-lg">{{ 'A - Alert' if lang == 'en' else 'A - منتبه' }}</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="radio" name="avpu" value="V" class="form-radio text-blue-600 h-5 w-5">
-                            <span class="ms-2 text-lg">{{ 'V - Verbal' if lang == 'en' else 'V - يستجيب للكلام' }}</span>
+                            <span class="{{ 'ml-2' if lang == 'en' else 'mr-2' }} text-lg">{{ 'V - Verbal' if lang == 'en' else 'V - يستجيب للكلام' }}</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="radio" name="avpu" value="P" class="form-radio text-blue-600 h-5 w-5">
-                            <span class="ms-2 text-lg">{{ 'P - Pain' if lang == 'en' else 'P - يستجيب للألم' }}</span>
+                            <span class="{{ 'ml-2' if lang == 'en' else 'mr-2' }} text-lg">{{ 'P - Pain' if lang == 'en' else 'P - يستجيب للألم' }}</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="radio" name="avpu" value="U" class="form-radio text-blue-600 h-5 w-5">
-                            <span class="ms-2 text-lg">{{ 'U - Unresponsive' if lang == 'en' else 'U - لا يستجيب' }}</span>
+                            <span class="{{ 'ml-2' if lang == 'en' else 'mr-2' }} text-lg">{{ 'U - Unresponsive' if lang == 'en' else 'U - لا يستجيب' }}</span>
                         </label>
                     </div>
                 </fieldset>
 
-                {/* Pain Score - Pain scales confirmed relevant by SRCA Scope Appendix C */}
                  <fieldset class="mb-6 border p-4 rounded-md">
                     <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">{{ 'Pain Score' if lang == 'en' else 'مستوى الألم' }}</legend>
                     <label for="pain-score" class="block text-gray-700 font-medium mb-1">{{ 'Rate Pain (0 = No Pain, 10 = Worst Pain Possible):' if lang == 'en' else 'حدد مستوى الألم (0 = لا يوجد ألم, 10 = أسوأ ألم ممكن):' }}</label>
-                    <input type="range" id="pain-score" name="pain_score" min="0" max="10" step="1" value="0" class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg dark:bg-gray-700 accent-blue-600">
+                    <input type="range" id="pain-score" name="pain_score" min="0" max="10" step="1" value="0" class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg accent-blue-600">
                     <div class="flex justify-between text-sm text-gray-600 px-1 mt-1">
                         <span>0</span>
                         <span>1</span>
@@ -364,7 +357,6 @@
                      <output id="pain-score-output" class="text-center block font-medium text-lg mt-2">0</output>
                 </fieldset>
 
-                {/* Other Modifiers - Including Glucose (relevant per SRCA Scope Appendix B/C) */}
                  <fieldset class="border p-4 rounded-md">
                     <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">{{ 'Other Modifiers' if lang == 'en' else 'مؤشرات أخرى' }}</legend>
                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -387,20 +379,18 @@
                             </select>
                         </div>
                          <div>
-                            <label for="mechanism-injury" class="block text-gray-700 font-medium mb-2">{{ 'Mechanism of Injury (Specify if applicable):' if lang == 'en' else 'آلية الإصابة (Mechanism of Injury - إذا كانت إصابة):' }}</label>
+                            <label for="mechanism-injury" class="block text-gray-700 font-medium mb-2">{{ 'Mechanism of Injury:' if lang == 'en' else 'آلية الإصابة:' }}</label>
                             <select id="mechanism-injury" name="mechanism_injury" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
-                                <option value="none">{{ 'None' if lang == 'en' else 'لا يوجد/غير مطبق' }}</option>
+                                <option value="none">{{ 'None/NA' if lang == 'en' else 'لا يوجد/غير مطبق' }}</option>
                                 <option value="minor">{{ 'Minor Mechanism' if lang == 'en' else 'آلية بسيطة' }}</option>
                                 <option value="significant">{{ 'Significant Mechanism' if lang == 'en' else 'آلية خطرة' }}</option>
                                 <option value="other">{{ 'Other' if lang == 'en' else 'أخرى' }}</option>
                             </select>
                         </div>
-                        {/* Glucose check interpretation is within scope (SRCA Scope Appendix B) */}
                          <div>
                             <label for="glucose" class="block text-gray-700 font-medium mb-2">{{ 'Glucose:' if lang == 'en' else 'مستوى السكر:' }}</label>
                             <input type="number" id="glucose" name="glucose" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
-                         {/* Example: Dehydration Signs - Relevant for assessing many conditions */}
                          <div>
                             <label for="dehydration" class="block text-gray-700 font-medium mb-2">{{ 'Dehydration Signs:' if lang == 'en' else 'علامات الجفاف:' }}</label>
                             <select id="dehydration" name="dehydration" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
@@ -410,7 +400,20 @@
                                 <option value="severe">{{ 'Severe' if lang == 'en' else 'شديد' }}</option>
                             </select>
                         </div>
-
+                         <div>
+                            <label for="heat-exposure" class="block text-gray-700 font-medium mb-2">{{ 'Heat Exposure:' if lang == 'en' else 'التعرض للحرارة:' }}</label>
+                            <select id="heat-exposure" name="heat_exposure" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="no">{{ 'No' if lang == 'en' else 'لا' }}</option>
+                                <option value="yes">{{ 'Yes' if lang == 'en' else 'نعم' }}</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="has-diabetes" class="block text-gray-700 font-medium mb-2">{{ 'Has Diabetes:' if lang == 'en' else 'مصاب بالسكري:' }}</label>
+                            <select id="has-diabetes" name="has_diabetes" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="no">{{ 'No' if lang == 'en' else 'لا' }}</option>
+                                <option value="yes">{{ 'Yes' if lang == 'en' else 'نعم' }}</option>
+                            </select>
+                        </div>
                     </div>
                 </fieldset>
 
@@ -418,23 +421,21 @@
                     <button type="button" onclick="prevStep(3)" 
                             class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500"
                             aria-label="{{ 'Go back to previous step' if lang == 'en' else 'الرجوع للخطوة السابقة' }}">
-                        &larr; {{ 'Previous' if lang == 'en' else 'السابق' }}
+                        {{ '←' if lang == 'en' else '→' }} {{ 'Previous' if lang == 'en' else 'السابق' }}
                     </button>
                     <button type="button" onclick="showSummary()" 
                             class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
                             aria-label="{{ 'Show summary' if lang == 'en' else 'عرض الملخص' }}">
-                        {{ 'Show Summary' if lang == 'en' else 'عرض الملخص' }} &rarr;
+                        {{ 'Show Summary' if lang == 'en' else 'عرض الملخص' }} {{ '→' if lang == 'en' else '←' }}
                     </button>
                 </div>
             </section>
 
             <section id="step-4" class="step-section hidden-section" aria-labelledby="step-4-heading">
-                <h3 id="step-4-heading" class="text-2xl font-semibold mb-6 text-gray-700 border-r-4 border-green-500 pr-4">{{ 'Step 4: Summary and CTAS Level' if lang == 'en' else 'الخطوة 4: الملخص ومستوى الفرز (CTAS)' }}</h3>
+                <h3 id="step-4-heading" class="text-2xl font-semibold mb-6 text-gray-700 border-{{ 'l' if lang == 'en' else 'r' }}-4 border-green-500 p{{ 'l' if lang == 'en' else 'r' }}-4">{{ 'Step 4: Summary and CTAS Level' if lang == 'en' else 'الخطوة 4: الملخص ومستوى الفرز (CTAS)' }}</h3>
 
-                {/* Display Area for Summary */}
                 <div id="summary-output" class="bg-gray-50 p-6 rounded-lg shadow-inner mb-8 space-y-3 text-lg">
                     <h4 class="text-xl font-semibold text-gray-800 mb-4">{{ 'Examination Summary' if lang == 'en' else 'ملخص الفحص' }}</h4>
-                    {/* Summary content will be populated by JavaScript */}
                      <p><strong>{{ 'Patient Name:' if lang == 'en' else 'اسم المريض:' }}</strong> <span id="summary-name"></span></p>
                      <p><strong>{{ 'Age:' if lang == 'en' else 'العمر:' }}</strong> <span id="summary-age"></span></p>
                      <p><strong>{{ 'Gender:' if lang == 'en' else 'الجنس:' }}</strong> <span id="summary-gender"></span></p>
@@ -450,526 +451,50 @@
                      <p><strong>{{ 'Glucose:' if lang == 'en' else 'مستوى السكر:' }}</strong> <span id="summary-glucose"></span></p>
                      <p><strong>{{ 'Dehydration Signs:' if lang == 'en' else 'علامات الجفاف:' }}</strong> <span id="summary-dehydration"></span></p>
                      <hr class="my-4">
-                     {/* Updated title to CTAS */}
-                     <p class="text-2xl font-bold"><strong>{{ 'Initial Triage Level (CTAS Level - Preliminary):' if lang == 'en' else 'مستوى الفرز المبدئي (CTAS Level - Preliminary):' }}</strong>
-                        <span id="summary-ctas-level" class="ctas-level-5"></span>
+                     <p class="text-2xl font-bold"><strong>{{ 'Initial Triage Level (CTAS Level - Preliminary):' if lang == 'en' else 'مستوى الفرز المبدئي (CTAS):' }}</strong>
+                        <span id="summary-ctas-level" class="px-3 py-1 rounded"></span>
                      </p>
-                     <p class="text-sm text-red-700 font-semibold">{{ '**Note: This level is a preliminary estimate based on input and requires clinical review and confirmation according to approved protocols.**' if lang == 'en' else '**تنبيه: هذا المستوى هو تقدير مبدئي بناءً على المدخلات ويحتاج لمراجعة وتأكيد إكلينيكي وفقاً للبروتوكولات المعتمدة.**' }}</p>
-                     <p class="text-sm text-red-700 font-semibold">{{ '**Disclaimer: This level is a preliminary estimate based on input and requires clinical review and confirmation according to approved protocols.**' if lang == 'en' else '**ملاحظة: هذا المستوى هو تقدير مبدئي بناءً على المدخلات ويحتاج لمراجعة وتأكيد إكلينيكي وفقاً للبروتوكولات المعتمدة.**' }}</p>
+                     <p><strong>{{ 'Estimated Wait Time:' if lang == 'en' else 'وقت الانتظار المتوقع:' }}</strong> <span id="summary-wait-time"></span></p>
+                     <p class="text-sm text-red-700 font-semibold">
+                        {% if lang == 'en' %}
+                            **Note: This level is a preliminary estimate based on input and requires clinical review and confirmation according to approved protocols.**
+                        {% else %}
+                            **تنبيه: هذا المستوى هو تقدير مبدئي بناءً على المدخلات ويحتاج لمراجعة وتأكيد إكلينيكي وفقاً للبروتوكولات المعتمدة.**
+                        {% endif %}
+                     </p>
                 </div>
 
-                {/* Action Buttons */}
                 <div class="mt-8 flex flex-col md:flex-row justify-between gap-4">
                     <button type="button" onclick="prevStep(4)" 
                             class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500"
                             aria-label="{{ 'Go back to previous step' if lang == 'en' else 'الرجوع للخطوة السابقة' }}">
-                        &larr; {{ 'Previous' if lang == 'en' else 'السابق' }}
+                        {{ '←' if lang == 'en' else '→' }} {{ 'Previous' if lang == 'en' else 'السابق' }}
                     </button>
                     <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                          <button type="button" onclick="preparePrint()" 
                                  class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500"
                                  aria-label="{{ 'Print summary' if lang == 'en' else 'طباعة الملخص' }}">
-                            طباعة (Print)
+                            {{ 'Print' if lang == 'en' else 'طباعة' }}
                         </button>
                         <button type="button" onclick="downloadCSV()" 
                                 class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500"
                                 aria-label="{{ 'Download CSV' if lang == 'en' else 'تحميل CSV' }}">
-                            تحميل CSV (Download CSV)
+                            {{ 'Download CSV' if lang == 'en' else 'تحميل CSV' }}
                         </button>
                          <button type="button" onclick="startNew()" 
                                  class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500"
                                  aria-label="{{ 'Start new examination' if lang == 'en' else 'بدء فحص جديد' }}">
-                            بدء فحص جديد (Start New)
+                            {{ 'Start New' if lang == 'en' else 'بدء فحص جديد' }}
                         </button>
                     </div>
                 </div>
             </section>
         </form>
 
-         {/* Area for printing */}
         <div id="print-area" class="hidden">
-            {/* Content for printing will be copied here by JS */}
         </div>
     </div>
 
-    {/* JavaScript */}
-    <script>
-        let currentStep = 1;
-        const totalSteps = 4; // 4 steps total
-
-        // Function to navigate to the next step
-        function nextStep(step) {
-            // Basic validation placeholder
-            if (step === 1) {
-                const ageInput = document.getElementById('patient-age');
-                if (!ageInput.value || parseInt(ageInput.value) < 0) {
-                    alert('Please enter a valid age.');
-                    ageInput.focus();
-                    return;
-                }
-            }
-             if (step === 2) {
-                const complaintSelect = document.getElementById('chief-complaint');
-                if (!complaintSelect.value) {
-                    alert('Please select a chief complaint.');
-                    complaintSelect.focus();
-                    return;
-                }
-            }
-             if (step === 3) {
-                 // Recommend GCS or AVPU selection, but don't strictly require for now
-                 const gcs = document.getElementById('gcs-score').value;
-                 const avpuElement = document.querySelector('input[name="avpu"]:checked');
-                 if (!gcs && !avpuElement) {
-                     alert('Please assess Level of Consciousness (GCS or AVPU recommended).');
-                     // Optionally focus on GCS input
-                     // document.getElementById('gcs-score').focus();
-                     // return; // Remove return if LOC is not strictly mandatory to proceed
-                 }
-             }
-
-
-            if (currentStep < totalSteps) {
-                document.getElementById(`step-${currentStep}`).classList.add('hidden-section');
-                currentStep++;
-                document.getElementById(`step-${currentStep}`).classList.remove('hidden-section');
-                window.scrollTo(0, 0); // Scroll to top
-            }
-        }
-
-        // Function to navigate to the previous step
-        function prevStep(step) {
-            if (currentStep > 1) {
-                document.getElementById(`step-${currentStep}`).classList.add('hidden-section');
-                currentStep--;
-                document.getElementById(`step-${currentStep}`).classList.remove('hidden-section');
-                window.scrollTo(0, 0); // Scroll to top
-            }
-        }
-
-         // Update pain score display
-        const painSlider = document.getElementById('pain-score');
-        const painOutput = document.getElementById('pain-score-output');
-        if(painSlider && painOutput) {
-            painOutput.textContent = painSlider.value; // Initial value
-            painSlider.oninput = function() {
-                painOutput.textContent = this.value;
-            }
-        }
-
-        // --- Enhanced CTAS Logic (5 Levels) ---
-        // VERSION 5 - Reverted to 5-level CTAS interpretation, informed by SRCA Scope PDF context.
-        // IMPORTANT: This logic is an INTERPRETATION based on general CTAS principles
-        // and the SCOPE outlined in the SRCA PDF (which confirms providers manage these conditions/assessments).
-        // The SRCA PDF does NOT provide a specific triage algorithm or vital sign cutoffs.
-        // **THIS LOGIC IS ILLUSTRATIVE AND REQUIRES THOROUGH REVIEW, VALIDATION,
-        // AND ADJUSTMENT BY CLINICAL EXPERTS BASED ON OFFICIAL SAUDI PROTOCOLS
-        // AND THE SPECIFIC CTAS GUIDELINES ADOPTED LOCALLY BEFORE ANY USE.**
-        function calculateCTAS() {
-            // --- Get Input Data ---
-            const age = parseInt(document.getElementById('patient-age').value) || 0;
-            const complaint = document.getElementById('chief-complaint').value;
-            const hr = parseInt(document.getElementById('heart-rate').value) || null;
-            const rr = parseInt(document.getElementById('resp-rate').value) || null;
-            const spo2 = parseInt(document.getElementById('spo2').value) || null;
-            const bpSys = parseInt(document.getElementById('bp-systolic').value) || null;
-            const temp = parseFloat(document.getElementById('temperature').value) || null;
-            const gcs = parseInt(document.getElementById('gcs-score').value) || null; // Use GCS as primary LOC for CTAS
-            const avpuElement = document.querySelector('input[name="avpu"]:checked');
-            const avpu = avpuElement ? avpuElement.value : null; // Use AVPU if GCS not available
-            const pain = parseInt(document.getElementById('pain-score').value) || 0;
-            const respDistress = document.getElementById('respiratory-distress').value; // none, mild, moderate, severe
-            const bleeding = document.getElementById('bleeding').value; // none, minor, moderate, severe
-            const moi = document.getElementById('mechanism-injury').value; // none, minor, significant, other
-            const glucose = parseInt(document.getElementById('glucose').value) || null;
-            const dehydration = document.getElementById('dehydration').value; // none, mild, moderate, severe
-
-            let ctasLevel = 5; // Default to lowest acuity (Non-Urgent)
-
-            // --- Determine Age Group (Examples - Refine based on official protocols) ---
-            let ageGroup = 'adult'; // Default
-            if (age < 1) ageGroup = 'infant';
-            else if (age < 3) ageGroup = 'toddler';
-            else if (age < 6) ageGroup = 'preschool';
-            else if (age < 13) ageGroup = 'school_age';
-            else if (age < 18) ageGroup = 'adolescent';
-
-            // --- Level 1: Resuscitation ---
-            // Conditions requiring immediate life-saving intervention.
-            let isLevel1 = false;
-            // Check LOC first (GCS < 9 or AVPU P/U are strong indicators)
-            if ((gcs !== null && gcs < 9) || (!gcs && (avpu === 'U' || avpu === 'P'))) {
-                isLevel1 = true;
-            }
-            // Check specific high-risk complaints or severe signs
-            if (!isLevel1 && (
-                complaint === 'cardiac_arrest' || complaint === 'resp_arrest' ||
-                respDistress === 'severe' || (spo2 !== null && spo2 < 90) || // Severe hypoxia
-                bleeding === 'severe' || complaint === 'shock' ||
-                complaint === 'major_trauma' || // Often defaults high
-                complaint === 'anaphylaxis' || // Often defaults high
-                complaint === 'seizure_active' // Active, prolonged seizure
-            )) {
-                isLevel1 = true;
-            }
-            // Check critical vital signs (EXAMPLES ONLY - VALIDATE RANGES)
-            if (!isLevel1) {
-                switch (ageGroup) {
-                    case 'infant': if ((hr !== null && (hr < 80 || hr > 200)) || (rr !== null && rr > 60)) isLevel1 = true; break;
-                    case 'toddler': if ((hr !== null && (hr < 70 || hr > 180)) || (rr !== null && rr > 50)) isLevel1 = true; break;
-                    case 'preschool': if ((hr !== null && (hr < 60 || hr > 160)) || (rr !== null && rr > 40)) isLevel1 = true; break;
-                    case 'school_age': if ((hr !== null && (hr < 50 || hr > 140)) || (rr !== null && rr > 35)) isLevel1 = true; break;
-                    case 'adolescent':
-                    case 'adult': if ((hr !== null && (hr < 40 || hr > 140)) || (rr !== null && (rr < 8 || rr > 35)) || (bpSys !== null && bpSys < 80)) isLevel1 = true; break;
-                }
-            }
-            if (isLevel1) return 1; // Assign Level 1 and exit
-
-            // --- Level 2: Emergent ---
-            // Conditions that are a potential threat to life, limb, or function requiring rapid medical intervention.
-            let isLevel2 = false;
-            let isHighRiskVitals = false;
-            let isModerateHypoxia = (spo2 !== null && spo2 >= 90 && spo2 < 92); // Moderate hypoxia often considered Emergent
-
-            // Check vital signs for Level 2 risk (EXAMPLES ONLY - VALIDATE RANGES)
-             switch (ageGroup) {
-                case 'infant': if ((hr !== null && hr > 180) || (rr !== null && rr > 50) || (bpSys !== null && bpSys < 70) || isModerateHypoxia) isHighRiskVitals = true; break;
-                case 'toddler': if ((hr !== null && hr > 160) || (rr !== null && rr > 40) || (bpSys !== null && bpSys < 75) || isModerateHypoxia) isHighRiskVitals = true; break;
-                case 'preschool': if ((hr !== null && hr > 140) || (rr !== null && rr > 35) || (bpSys !== null && bpSys < 80) || isModerateHypoxia) isHighRiskVitals = true; break;
-                case 'school_age': if ((hr !== null && hr > 130) || (rr !== null && rr > 30) || (bpSys !== null && bpSys < 85) || isModerateHypoxia) isHighRiskVitals = true; break;
-                case 'adolescent': if ((hr !== null && hr > 120) || (rr !== null && rr > 28) || (bpSys !== null && bpSys < 90) || isModerateHypoxia) isHighRiskVitals = true; break;
-                case 'adult': if ((hr !== null && (hr < 50 || hr > 120)) || (rr !== null && (rr < 10 || rr > 30)) || (bpSys !== null && bpSys < 90) || isModerateHypoxia) isHighRiskVitals = true; break;
-            }
-
-            // Check LOC (GCS 9-13 or AVPU=V)
-            if ((gcs !== null && gcs >= 9 && gcs <= 13) || (!gcs && avpu === 'V')) {
-                isLevel2 = true;
-            }
-            // Check specific high-risk complaints or signs
-            if (!isLevel2 && (
-                complaint === 'chest_pain_cardiac' || complaint === 'stroke' ||
-                complaint === 'sepsis' || complaint === 'overdose' || // Depending on substance/vitals
-                respDistress === 'moderate' || pain >= 8 || complaint === 'severe_pain' ||
-                complaint === 'head_injury_moderate' || // Requires careful definition
-                complaint === 'vaginal_bleeding_heavy' ||
-                complaint === 'fever_infant' || // Fever in very young often high risk
-                complaint === 'psych_severe' || // e.g., immediate risk to self/others
-                dehydration === 'severe' || // Severe dehydration is emergent
-                moi === 'significant' || // Significant MOI often warrants Level 2
-                (glucose !== null && (glucose < 3.0 || glucose > 20.0)) // Example critical glucose (mmol/L) - VALIDATE
-            )) {
-                isLevel2 = true;
-            }
-            // Check high-risk vitals
-            if (!isLevel2 && isHighRiskVitals) {
-                isLevel2 = true;
-            }
-            if (isLevel2) return 2; // Assign Level 2 and exit
-
-            // --- Level 3: Urgent ---
-            // Conditions that could potentially progress to a serious problem requiring emergency intervention.
-            // Can relate to significant discomfort or affect ability to perform activities of daily living.
-            let isLevel3 = false;
-            let isModerateConcernVitals = false;
-
-             // Check vital signs for Level 3 concern (EXAMPLES ONLY - VALIDATE RANGES)
-             switch (ageGroup) {
-                 // Example: Slightly abnormal HR/RR or borderline BP might contribute to Level 3
-                case 'infant': if ((hr !== null && hr > 160) || (rr !== null && rr > 45)) isModerateConcernVitals = true; break; // Lower threshold than L2
-                case 'toddler': if ((hr !== null && hr > 150) || (rr !== null && rr > 35)) isModerateConcernVitals = true; break;
-                case 'preschool': if ((hr !== null && hr > 130) || (rr !== null && rr > 30)) isModerateConcernVitals = true; break;
-                case 'school_age': if ((hr !== null && hr > 120) || (rr !== null && rr > 25)) isModerateConcernVitals = true; break;
-                case 'adolescent':
-                case 'adult': if ((hr !== null && (hr > 100 && hr <= 120)) || (rr !== null && rr > 24 && rr <= 30) || (bpSys !== null && bpSys >= 90 && bpSys < 100)) isModerateConcernVitals = true; break;
-            }
-
-            // Check LOC (GCS 14)
-            if (gcs !== null && gcs === 14) {
-                isLevel3 = true;
-            }
-            // Check specific complaints or signs
-            if (!isLevel3 && (
-                respDistress === 'mild' || (pain >= 4 && pain <= 7) || // Moderate pain
-                complaint === 'abdominal_pain_severe' || // Often needs urgent workup
-                bleeding === 'moderate' || dehydration === 'moderate' ||
-                (temp !== null && temp >= 39.0 && age >= 1) // High fever threshold (VALIDATE)
-            )) {
-                isLevel3 = true;
-            }
-             // Check moderate concern vitals
-            if (!isLevel3 && isModerateConcernVitals) {
-                 isLevel3 = true;
-            }
-            if (isLevel3) return 3; // Assign Level 3 and exit
-
-            // --- Level 4: Less Urgent ---
-            // Conditions related to patient age, distress, or potential for complications that would benefit from intervention or reassurance within 1-2 hours.
-            let isLevel4 = false;
-
-            if (complaint === 'minor_trauma' || complaint === 'vomiting_diarrhea_mild' ||
-                (pain >= 1 && pain <= 3) || // Mild pain
-                bleeding === 'minor' || dehydration === 'mild' ||
-                (temp !== null && temp >= 38.0 && age >= 2) // General fever in older child/adult without other high-risk signs
-               ) {
-                 isLevel4 = true;
-            }
-            // Check for stable but slightly abnormal vitals not meeting L3 criteria (Example)
-            if (!isLevel4) {
-                 switch (ageGroup) {
-                    case 'adolescent':
-                    case 'adult': if ((hr !== null && hr > 100 && hr <= 110) || (rr !== null && rr > 20 && rr <= 24)) isLevel4 = true; break; // Mild Tachy/Tachypnea
-                }
-            }
-
-            if (isLevel4) return 4; // Assign Level 4 and exit
-
-            // --- Level 5: Non-Urgent ---
-            // Conditions that are acute but non-urgent or chronic problems needing advice/referral. Assessment could be delayed.
-            // If none of the above criteria met, it remains Level 5.
-            // Example: complaint === 'rash' without fever or other modifiers.
-
-            return ctasLevel; // Return the final calculated level (default is 5)
-        }
-
-
-        // Function to gather data and display summary
-        function showSummary() {
-            // Gather data from form
-            const formData = new FormData(document.getElementById('triage-form'));
-            const data = Object.fromEntries(formData.entries());
-
-            // Calculate CTAS Level (5 Levels)
-            const ctasLevel = calculateCTAS(); // Returns 1, 2, 3, 4, or 5
-
-            // Populate summary fields
-            document.getElementById('summary-name').textContent = data.patient_name || 'N/A';
-            document.getElementById('summary-age').textContent = data.patient_age || 'N/A';
-
-            const genderSelect = document.getElementById('patient-gender');
-            document.getElementById('summary-gender').textContent = genderSelect.options[genderSelect.selectedIndex]?.text || data.patient_gender || 'N/A';
-
-            document.getElementById('summary-id').textContent = data.patient_id || 'N/A';
-
-            const complaintSelect = document.getElementById('chief-complaint');
-            const selectedComplaintText = complaintSelect.options[complaintSelect.selectedIndex]?.text || data.chief_complaint || 'N/A';
-            document.getElementById('summary-complaint').textContent = selectedComplaintText;
-            document.getElementById('summary-complaint-details').textContent = data.complaint_details || 'N/A';
-
-            const vitals = `HR: ${data.heart_rate || 'N/A'}, RR: ${data.resp_rate || 'N/A'}, SpO2: ${data.spo2 || 'N/A'}%, BP: ${data.bp_systolic || 'N/A'}/${data.bp_diastolic || 'N/A'}, Temp: ${data.temperature || 'N/A'}°C`;
-            document.getElementById('summary-vitals').textContent = vitals;
-
-            // Display GCS primarily, fallback to AVPU if GCS empty
-            const gcsValue = data.gcs_score;
-            const avpuElement = document.querySelector('input[name="avpu"]:checked');
-            const avpuValue = avpuElement ? avpuElement.value : null;
-            let locText = 'N/A';
-            if (gcsValue) {
-                locText = `GCS: ${gcsValue}`;
-                if (avpuValue) locText += ` (AVPU: ${avpuValue})`; // Show both if available
-            } else if (avpuValue) {
-                locText = `AVPU: ${avpuValue}`;
-            }
-            document.getElementById('summary-loc').textContent = locText;
-
-            document.getElementById('summary-pain').textContent = data.pain_score || '0';
-
-            const respDistressSelect = document.getElementById('respiratory-distress');
-            document.getElementById('summary-resp-distress').textContent = respDistressSelect.options[respDistressSelect.selectedIndex]?.text || data.respiratory_distress || 'N/A';
-
-            const bleedingSelect = document.getElementById('bleeding');
-            document.getElementById('summary-bleeding').textContent = bleedingSelect.options[bleedingSelect.selectedIndex]?.text || data.bleeding || 'N/A';
-
-            const moiSelect = document.getElementById('mechanism-injury');
-            document.getElementById('summary-moi').textContent = moiSelect.options[moiSelect.selectedIndex]?.text || data.mechanism_injury || 'N/A';
-
-            document.getElementById('summary-glucose').textContent = data.glucose || 'N/A';
-
-            const dehydrationSelect = document.getElementById('dehydration');
-             document.getElementById('summary-dehydration').textContent = dehydrationSelect.options[dehydrationSelect.selectedIndex]?.text || data.dehydration || 'N/A';
-
-
-            // Display CTAS Level and Apply Color
-             const levelSpan = document.getElementById('summary-ctas-level');
-             levelSpan.textContent = ctasLevel;
-             // Apply color class - remove old ones first
-             levelSpan.className = 'font-bold'; // Reset base class
-             switch(ctasLevel) {
-                 case 1: levelSpan.classList.add('ctas-level-1'); break;
-                 case 2: levelSpan.classList.add('ctas-level-2'); break;
-                 case 3: levelSpan.classList.add('ctas-level-3'); break;
-                 case 4: levelSpan.classList.add('ctas-level-4'); break;
-                 case 5: levelSpan.classList.add('ctas-level-5'); break;
-                 default: levelSpan.classList.add('ctas-level-5'); break;
-             }
-
-
-            // Show summary step
-            nextStep(3); // Assumes current step is 3 when this is called
-        }
-
-        // Function to prepare content for printing
-        function preparePrint() {
-            const summaryContent = document.getElementById('summary-output').innerHTML;
-            const printArea = document.getElementById('print-area');
-            // Add a title for the printout
-            printArea.innerHTML = `<h2 style="text-align: center; font-family: Inter, sans-serif; color: black; margin-bottom: 20px;">Pre-Hospital Examination Summary</h2>` + summaryContent;
-            // Apply some basic print styling directly if needed
-            printArea.style.fontFamily = 'Inter, sans-serif';
-            printArea.style.color = 'black';
-            printArea.classList.remove('hidden'); // Make print area visible for printing
-            window.print(); // Trigger browser print dialog
-            printArea.classList.add('hidden'); // Hide print area again after printing
-            printArea.innerHTML = ''; // Clear content
-        }
-
-        // Function to download data as CSV
-        function downloadCSV() {
-            const formData = new FormData(document.getElementById('triage-form'));
-            const data = Object.fromEntries(formData.entries());
-            const ctasLevel = calculateCTAS(); // Recalculate
-
-            // Add CTAS level to data
-            data['ctas_level_preliminary'] = ctasLevel;
-
-
-            // Map selected text for dropdowns
-             const complaintSelect = document.getElementById('chief-complaint');
-             data['chief_complaint_text'] = complaintSelect.options[complaintSelect.selectedIndex]?.text || data.chief_complaint;
-             const respDistressSelect = document.getElementById('respiratory-distress');
-             data['respiratory_distress_text'] = respDistressSelect.options[respDistressSelect.selectedIndex]?.text || data.respiratory_distress;
-             const bleedingSelect = document.getElementById('bleeding');
-             data['bleeding_text'] = bleedingSelect.options[bleedingSelect.selectedIndex]?.text || data.bleeding;
-             const moiSelect = document.getElementById('mechanism-injury');
-             data['mechanism_injury_text'] = moiSelect.options[moiSelect.selectedIndex]?.text || data.mechanism_injury;
-             const genderSelect = document.getElementById('patient-gender');
-             data['patient_gender_text'] = genderSelect.options[genderSelect.selectedIndex]?.text || data.patient_gender;
-             const dehydrationSelect = document.getElementById('dehydration');
-             data['dehydration_text'] = dehydrationSelect.options[dehydrationSelect.selectedIndex]?.text || data.dehydration;
-             const avpuElement = document.querySelector('input[name="avpu"]:checked'); // Get selected AVPU
-             data['avpu_selected'] = avpuElement ? avpuElement.value : '';
-
-
-             // Define CSV headers and corresponding data keys
-             const csvMap = {
-                'Patient Name': 'patient_name',
-                'Age': 'patient_age',
-                'Gender': 'patient_gender_text',
-                'ID/MRN': 'patient_id',
-                'Chief Complaint': 'chief_complaint_text',
-                'Complaint Details': 'complaint_details',
-                'Heart Rate': 'heart_rate',
-                'Resp Rate': 'resp_rate',
-                'SpO2': 'spo2',
-                'BP Systolic': 'bp_systolic',
-                'BP Diastolic': 'bp_diastolic',
-                'Temperature': 'temperature',
-                'GCS Score': 'gcs_score', // Keep GCS in CSV
-                'AVPU': 'avpu_selected', // Keep AVPU in CSV
-                'Pain Score': 'pain_score',
-                'Respiratory Distress': 'respiratory_distress_text',
-                'Bleeding': 'bleeding_text',
-                'Mechanism of Injury': 'mechanism_injury_text',
-                'Glucose': 'glucose',
-                'Dehydration Signs': 'dehydration_text',
-                'CTAS Level (Preliminary)': 'ctas_level_preliminary' // Use numeric CTAS level
-            };
-
-            const csvHeaders = Object.keys(csvMap);
-            const csvDataRow = csvHeaders.map(header => data[csvMap[header]] || ''); // Get data based on map
-
-
-            // Format to CSV string
-            // Added BOM for better Excel compatibility with UTF-8 (especially Arabic)
-            let csvContent = "\uFEFF" // BOM
-                + csvHeaders.map(h => `"${h}"`).join(",") + "\n" // Header row
-                + csvDataRow.map(d => `"${String(d).replace(/"/g, '""')}"`).join(","); // Data row
-
-            // Create download link
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const filename = `prehospital_exam_${data.patient_name || 'unknown'}_${timestamp}.csv`;
-            link.setAttribute("download", filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-         // Function to reset the form and go back to step 1
-        function startNew() {
-            // Use a more user-friendly confirmation dialog if possible, but alert is simplest
-            if (confirm('هل أنت متأكد من رغبتك في بدء فحص جديد؟ سيتم فقدان جميع البيانات الحالية.\nAre you sure you want to start a new examination? All current data will be lost.')) {
-                document.getElementById('triage-form').reset(); // Reset form fields
-                // Manually reset range slider display
-                 const painOutput = document.getElementById('pain-score-output');
-                 if(painOutput) painOutput.textContent = '0';
-                 const painSlider = document.getElementById('pain-score');
-                 if(painSlider) painSlider.value = '0';
-
-
-                // Hide all steps except the first one
-                document.querySelectorAll('.step-section').forEach(section => {
-                    if (section.id !== 'step-1') {
-                         section.classList.add('hidden-section');
-                    }
-                });
-                document.getElementById('step-1').classList.remove('hidden-section');
-                currentStep = 1;
-                window.scrollTo(0, 0); // Scroll to top
-            }
-        }
-
-        // Language and Theme Toggle Functions
-        function toggleLanguage() {
-            const currentLang = document.documentElement.lang;
-            const newLang = currentLang === 'en' ? 'ar' : 'en';
-            
-            fetch('/set_language', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ language: newLang })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Reload the page to apply language changes
-                    window.location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error switching language:', error);
-            });
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            fetch('/set_theme', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ theme: newTheme })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Reload the page to apply theme changes
-                    window.location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error switching theme:', error);
-            });
-        }
-
-    </script>
+    <script src="{{ url_for('static', filename='js/triage.js') }}"></script>
 </body>
 </html>

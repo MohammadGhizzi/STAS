@@ -26,7 +26,6 @@ app.config['PERMANENT_SESSION_LIFETIME'] = int(os.environ.get('PERMANENT_SESSION
 # Application settings
 DEFAULT_LANGUAGE = os.environ.get('DEFAULT_LANGUAGE', 'ar')
 SUPPORTED_LANGUAGES = os.environ.get('SUPPORTED_LANGUAGES', 'ar,en').split(',')
-DEFAULT_THEME = os.environ.get('DEFAULT_THEME', 'light')
 
 # Setup logging for production
 flask_env = os.environ.get('FLASK_ENV', 'production')
@@ -229,130 +228,228 @@ def calculate_ctas_logic(data):
 # Simple function to get text representation from value (for selects)
 # This needs the actual mapping from the HTML, stored here for convenience
 # In a real app, this mapping might be better placed elsewhere (config, db)
-def get_text_from_value(field_id, value, tool_type='professional'):
+def get_text_from_value(field_id, value, tool_type='professional', lang='ar'):
     """Gets text representation for select/radio values from different forms."""
 
-    # Mappings specific to mepw.html (professional tool)
-    professional_mapping = {
+    # Mappings specific to professional tool - Arabic versions
+    professional_mapping_ar = {
         'patient-gender': {
-            'male': 'ذكر (Male)', 'female': 'أنثى (Female)', 'other': 'آخر (Other)', '': 'اختر (Select)'
+            'male': 'ذكر', 'female': 'أنثى', 'other': 'آخر', '': 'اختر'
         },
         'chief-complaint': {
-             'cardiac_arrest': 'توقف القلب (Cardiac Arrest / VSA)', 'resp_arrest': 'توقف التنفس (Respiratory Arrest)',
-             'major_trauma': 'إصابة بليغة (Major Trauma)', 'chest_pain_cardiac': 'ألم في الصدر (يشتبه بالقلب) (Chest Pain - Cardiac?)',
-             'resp_distress_severe': 'ضيق تنفس حاد (Resp Distress - Severe)', 'shock': 'صدمة (Shock)',
-             'loc_decreased': 'انخفاض مستوى الوعي (LOC Decreased)', 'seizure_active': 'تشنج نشط (Seizure - Active)',
-             'stroke': 'جلطة دماغية (Stroke / CVA)', 'anaphylaxis': 'حساسية مفرطة (Anaphylaxis)',
-             'overdose': 'جرعة زائدة (Overdose)', 'sepsis': 'تسمم الدم (Sepsis)',
-             'severe_pain': 'ألم شديد (Severe Pain)', 'resp_distress_moderate': 'ضيق تنفس متوسط (Resp Distress - Moderate)',
-             'abdominal_pain_severe': 'ألم بطن شديد (Abdominal Pain - Severe)', 'head_injury_moderate': 'إصابة رأس متوسطة (Head Injury - Moderate)',
-             'vaginal_bleeding_heavy': 'نزيف مهبلي غزير (Vaginal Bleeding - Heavy)', 'fever_infant': 'حمى (رضيع < 3 أشهر) (Fever - Infant < 3mo)',
-             'psych_severe': 'حالة نفسية حادة (Psychiatric - Severe)', 'minor_trauma': 'إصابة طفيفة (Minor Trauma)',
-             'mild_pain': 'ألم خفيف (Mild Pain)', 'vomiting_diarrhea_mild': 'قيء/إسهال خفيف (Vomiting/Diarrhea - Mild)',
-             'rash': 'طفح جلدي (Rash)', 'other': 'أخرى (Other - specify below)', '': '-- اختر الشكوى --'
+             'cardiac_arrest': 'توقف القلب', 'resp_arrest': 'توقف التنفس',
+             'major_trauma': 'إصابة بليغة', 'chest_pain_cardiac': 'ألم في الصدر (يشتبه بالقلب)',
+             'resp_distress_severe': 'ضيق تنفس حاد', 'shock': 'صدمة',
+             'loc_decreased': 'انخفاض مستوى الوعي', 'seizure_active': 'تشنج نشط',
+             'stroke': 'جلطة دماغية', 'anaphylaxis': 'حساسية مفرطة',
+             'overdose': 'جرعة زائدة', 'sepsis': 'تسمم الدم',
+             'severe_pain': 'ألم شديد', 'resp_distress_moderate': 'ضيق تنفس متوسط',
+             'abdominal_pain_severe': 'ألم بطن شديد', 'head_injury_moderate': 'إصابة رأس متوسطة',
+             'vaginal_bleeding_heavy': 'نزيف مهبلي غزير', 'fever_infant': 'حمى (رضيع < 3 أشهر)',
+             'psych_severe': 'حالة نفسية حادة', 'minor_trauma': 'إصابة طفيفة',
+             'mild_pain': 'ألم خفيف', 'vomiting_diarrhea_mild': 'قيء/إسهال خفيف',
+             'rash': 'طفح جلدي', 'other': 'أخرى', '': '-- اختر الشكوى --'
         },
         'respiratory-distress': {
-            'none': 'لا يوجد (None)', 'mild': 'خفيف (Mild)', 'moderate': 'متوسط (Moderate)', 'severe': 'شديد (Severe)'
+            'none': 'لا يوجد', 'mild': 'خفيف', 'moderate': 'متوسط', 'severe': 'شديد'
         },
         'bleeding': {
-            'none': 'لا يوجد (None)', 'minor': 'طفيف (Minor)', 'moderate': 'متوسط / كبير يمكن السيطرة عليه (Moderate / Significant Controlled)', 'severe': 'شديد / غير مسيطر عليه (Severe / Uncontrolled)'
+            'none': 'لا يوجد', 'minor': 'طفيف', 'moderate': 'متوسط / كبير يمكن السيطرة عليه', 'severe': 'شديد / غير مسيطر عليه'
         },
         'mechanism-injury': {
-            'none': 'لا يوجد/غير مطبق (None/NA)', 'minor': 'آلية بسيطة (Minor Mechanism)', 'significant': 'آلية خطرة (Significant Mechanism - e.g., high fall/speed, rollover, penetrating)', 'other': 'أخرى (Other)'
+            'none': 'لا يوجد/غير مطبق', 'minor': 'آلية بسيطة', 'significant': 'آلية خطرة', 'other': 'أخرى'
         },
         'dehydration': {
-             'none': 'لا يوجد (None)', 'mild': 'خفيف (Mild - e.g., thirsty)', 'moderate': 'متوسط (Moderate - e.g., dry mucous membranes)', 'severe': 'شديد (Severe - e.g., poor turgor, lethargy)'
+             'none': 'لا يوجد', 'mild': 'خفيف', 'moderate': 'متوسط', 'severe': 'شديد'
         }
     }
 
-    # Mappings specific to meow.html (self-assessment tool)
-    self_assessment_mapping = {
+    # Mappings specific to professional tool - English versions
+    professional_mapping_en = {
         'patient-gender': {
-            'male': 'ذكر (Male)', 'female': 'أنثى (Female)', 'prefer_not_say': 'أفضل عدم القول (Prefer not to say)', '': 'اختر (Select)'
+            'male': 'Male', 'female': 'Female', 'other': 'Other', '': 'Select'
+        },
+        'chief-complaint': {
+             'cardiac_arrest': 'Cardiac Arrest / VSA', 'resp_arrest': 'Respiratory Arrest',
+             'major_trauma': 'Major Trauma', 'chest_pain_cardiac': 'Chest Pain - Cardiac?',
+             'resp_distress_severe': 'Resp Distress - Severe', 'shock': 'Shock',
+             'loc_decreased': 'LOC Decreased', 'seizure_active': 'Seizure - Active',
+             'stroke': 'Stroke / CVA', 'anaphylaxis': 'Anaphylaxis',
+             'overdose': 'Overdose', 'sepsis': 'Sepsis',
+             'severe_pain': 'Severe Pain', 'resp_distress_moderate': 'Resp Distress - Moderate',
+             'abdominal_pain_severe': 'Abdominal Pain - Severe', 'head_injury_moderate': 'Head Injury - Moderate',
+             'vaginal_bleeding_heavy': 'Vaginal Bleeding - Heavy', 'fever_infant': 'Fever - Infant < 3mo',
+             'psych_severe': 'Psychiatric - Severe', 'minor_trauma': 'Minor Trauma',
+             'mild_pain': 'Mild Pain', 'vomiting_diarrhea_mild': 'Vomiting/Diarrhea - Mild',
+             'rash': 'Rash', 'other': 'Other - specify below', '': '-- Select Complaint --'
+        },
+        'respiratory-distress': {
+            'none': 'None', 'mild': 'Mild', 'moderate': 'Moderate', 'severe': 'Severe'
+        },
+        'bleeding': {
+            'none': 'None', 'minor': 'Minor', 'moderate': 'Moderate / Significant Controlled', 'severe': 'Severe / Uncontrolled'
+        },
+        'mechanism-injury': {
+            'none': 'None/NA', 'minor': 'Minor Mechanism', 'significant': 'Significant Mechanism - e.g., high fall/speed, rollover, penetrating', 'other': 'Other'
+        },
+        'dehydration': {
+             'none': 'None', 'mild': 'Mild - e.g., thirsty', 'moderate': 'Moderate - e.g., dry mucous membranes', 'severe': 'Severe - e.g., poor turgor, lethargy'
+        }
+    }
+
+    # Mappings specific to self-assessment tool - Arabic versions
+    self_assessment_mapping_ar = {
+        'patient-gender': {
+            'male': 'ذكر', 'female': 'أنثى', 'prefer_not_say': 'أفضل عدم القول', '': 'اختر'
         },
         'has-diabetes': {
-            'no': 'لا (No)', 'yes': 'نعم (Yes)', 'unsure': 'غير متأكد (Unsure)'
+            'no': 'لا', 'yes': 'نعم', 'unsure': 'غير متأكد'
         },
         'main-symptom': {
-            'cannot_breathe': 'لا أستطيع التنفس / غصة شديدة (Cannot breathe / Severe choking)',
-            'severe_chest_pain': 'ألم شديد أو ضغط في الصدر (Severe chest pain or pressure)',
-            'severe_breathing_difficulty': 'صعوبة شديدة في التنفس (Severe difficulty breathing)',
-            'severe_bleeding': 'نزيف حاد لا يتوقف (Severe bleeding that won\'t stop)',
-            'not_responding': 'فقدان الوعي / صعوبة شديدة في الإفاقة (Unconscious / Very difficult to wake up)',
-            'active_seizure': 'نوبة تشنج مستمرة الآن (Ongoing seizure now)',
-            'stroke_signs': 'علامات جلطة دماغية (مثل: تدلي الوجه، ضعف ذراع، صعوبة كلام) (Stroke signs)',
-            'severe_allergic_reaction': 'رد فعل تحسسي شديد (تورم، صعوبة تنفس) (Severe allergic reaction)',
-            'confusion_severe': 'تشوش ذهني حاد / ارتباك شديد (Severe confusion)',
-            'severe_pain_other': 'ألم شديد جداً (غير الصدر) (Very severe pain - non-chest)',
-            'moderate_breathing_difficulty': 'صعوبة متوسطة في التنفس (Moderate difficulty breathing)',
-            'poison_overdose': 'اشتباه تسمم أو جرعة زائدة (Suspected poisoning or overdose)',
-            'moderate_bleeding': 'نزيف متوسط (يحتاج ضغط) (Moderate bleeding - needs pressure)',
-            'fever_very_high': 'حمى شديدة جداً (Very high fever)',
-            'severe_headache': 'صداع شديد جداً ومفاجئ (Very severe, sudden headache)',
-            'severe_abdominal_pain': 'ألم شديد في البطن (Severe abdominal pain)',
-            'moderate_pain': 'ألم متوسط (Moderate pain)',
-            'mild_breathing_difficulty': 'صعوبة خفيفة في التنفس (Mild difficulty breathing)',
-            'vomiting_diarrhea': 'قيء أو إسهال (Vomiting or diarrhea)',
-            'fever_mild_moderate': 'حمى خفيفة أو متوسطة (Mild or moderate fever)',
-            'minor_injury': 'إصابة طفيفة (Minor injury)',
-            'mild_pain_symptoms': 'ألم خفيف / أعراض خفيفة أخرى (Mild pain / Other mild symptoms)',
-            'other': 'شيء آخر (Something else - describe below)',
+            'cannot_breathe': 'لا أستطيع التنفس / غصة شديدة',
+            'severe_chest_pain': 'ألم شديد أو ضغط في الصدر',
+            'severe_breathing_difficulty': 'صعوبة شديدة في التنفس',
+            'severe_bleeding': 'نزيف حاد لا يتوقف',
+            'not_responding': 'فقدان الوعي / صعوبة شديدة في الإفاقة',
+            'active_seizure': 'نوبة تشنج مستمرة الآن',
+            'stroke_signs': 'علامات جلطة دماغية (مثل: تدلي الوجه، ضعف ذراع، صعوبة كلام)',
+            'severe_allergic_reaction': 'رد فعل تحسسي شديد (تورم، صعوبة تنفس)',
+            'confusion_severe': 'تشوش ذهني حاد / ارتباك شديد',
+            'severe_pain_other': 'ألم شديد جداً (غير الصدر)',
+            'moderate_breathing_difficulty': 'صعوبة متوسطة في التنفس',
+            'poison_overdose': 'اشتباه تسمم أو جرعة زائدة',
+            'moderate_bleeding': 'نزيف متوسط (يحتاج ضغط)',
+            'fever_very_high': 'حمى شديدة جداً',
+            'severe_headache': 'صداع شديد جداً ومفاجئ',
+            'severe_abdominal_pain': 'ألم شديد في البطن',
+            'moderate_pain': 'ألم متوسط',
+            'mild_breathing_difficulty': 'صعوبة خفيفة في التنفس',
+            'vomiting_diarrhea': 'قيء أو إسهال',
+            'fever_mild_moderate': 'حمى خفيفة أو متوسطة',
+            'minor_injury': 'إصابة طفيفة',
+            'mild_pain_symptoms': 'ألم خفيف / أعراض خفيفة أخرى',
+            'other': 'شيء آخر',
             '': '-- اختر العرض الأهم --'
         },
         'alertness': {
-            'A': 'طبيعي وواعي تماماً (Fully awake and alert)',
-            'V': 'أشعر بالنعاس أو الارتباك قليلاً (Drowsy or a bit confused, but respond)',
-            'P': 'مرتبك جداً / يصعب إيقاظي (Very confused / Difficult to wake up)',
-            'U': 'لا أستجيب / فاقد الوعي (Unresponsive / Unconscious)'
+            'A': 'طبيعي وواعي تماماً',
+            'V': 'أشعر بالنعاس أو الارتباك قليلاً',
+            'P': 'مرتبك جداً / يصعب إيقاظي',
+            'U': 'لا أستجيب / فاقد الوعي'
         },
         'breathing-difficulty': {
-            'none': 'لا توجد صعوبة (No trouble)', 'mild': 'صعوبة خفيفة (Mild trouble)',
-            'moderate': 'صعوبة متوسطة (Moderate trouble)', 'severe': 'صعوبة شديدة (Severe trouble)',
-            'cannot_breathe': 'لا أستطيع التنفس (Cannot breathe at all)'
+            'none': 'لا توجد صعوبة', 'mild': 'صعوبة خفيفة',
+            'moderate': 'صعوبة متوسطة', 'severe': 'صعوبة شديدة',
+            'cannot_breathe': 'لا أستطيع التنفس'
         },
         'bleeding': {
-            'none': 'لا يوجد (None)', 'minor': 'نزيف خفيف (يتوقف بسهولة) (Minor - stops easily)',
-            'moderate': 'نزيف متوسط (يحتاج ضغط) (Moderate - needs pressure)',
-            'severe': 'نزيف شديد (يصعب إيقافه) (Severe - hard to stop)'
+            'none': 'لا يوجد', 'minor': 'نزيف خفيف (يتوقف بسهولة)',
+            'moderate': 'نزيف متوسط (يحتاج ضغط)',
+            'severe': 'نزيف شديد (يصعب إيقافه)'
         },
         'dehydration': {
-            'none': 'لا (No)', 'mild': 'قليلاً (A little)',
-            'moderate': 'نعم، بشكل متوسط (Yes, moderately)', 'severe': 'نعم، بشكل شديد (Yes, severely)'
+            'none': 'لا', 'mild': 'قليلاً',
+            'moderate': 'نعم، بشكل متوسط', 'severe': 'نعم، بشكل شديد'
         },
         'feverish': {
-            'no': 'لا (No)', 'yes_mild_mod': 'نعم، خفيفة أو متوسطة (Yes, mild/moderate)',
-            'yes_high': 'نعم، عالية (Yes, high)', 'unsure': 'غير متأكد (Unsure)'
+            'no': 'لا', 'yes_mild_mod': 'نعم، خفيفة أو متوسطة',
+            'yes_high': 'نعم، عالية', 'unsure': 'غير متأكد'
         },
         'trauma_occurred': {
-            'no': 'لا (No)', 'yes_minor': 'نعم، إصابة بسيطة (Yes, minor injury)',
-            'yes_significant': 'نعم، حادث أو إصابة خطيرة (Yes, serious accident/injury)'
+            'no': 'لا', 'yes_minor': 'نعم، إصابة بسيطة',
+            'yes_significant': 'نعم، حادث أو إصابة خطيرة'
         }
     }
 
-    # Select the correct mapping based on tool_type
-    mapping_to_use = professional_mapping if tool_type == 'professional' else self_assessment_mapping
+    # Mappings specific to self-assessment tool - English versions
+    self_assessment_mapping_en = {
+        'patient-gender': {
+            'male': 'Male', 'female': 'Female', 'prefer_not_say': 'Prefer not to say', '': 'Select'
+        },
+        'has-diabetes': {
+            'no': 'No', 'yes': 'Yes', 'unsure': 'Unsure'
+        },
+        'main-symptom': {
+            'cannot_breathe': 'Cannot breathe / Severe choking',
+            'severe_chest_pain': 'Severe chest pain or pressure',
+            'severe_breathing_difficulty': 'Severe difficulty breathing',
+            'severe_bleeding': 'Severe bleeding that won\'t stop',
+            'not_responding': 'Unconscious / Very difficult to wake up',
+            'active_seizure': 'Ongoing seizure now',
+            'stroke_signs': 'Stroke signs',
+            'severe_allergic_reaction': 'Severe allergic reaction',
+            'confusion_severe': 'Severe confusion',
+            'severe_pain_other': 'Very severe pain - non-chest',
+            'moderate_breathing_difficulty': 'Moderate difficulty breathing',
+            'poison_overdose': 'Suspected poisoning or overdose',
+            'moderate_bleeding': 'Moderate bleeding - needs pressure',
+            'fever_very_high': 'Very high fever',
+            'severe_headache': 'Very severe, sudden headache',
+            'severe_abdominal_pain': 'Severe abdominal pain',
+            'moderate_pain': 'Moderate pain',
+            'mild_breathing_difficulty': 'Mild difficulty breathing',
+            'vomiting_diarrhea': 'Vomiting or diarrhea',
+            'fever_mild_moderate': 'Mild or moderate fever',
+            'minor_injury': 'Minor injury',
+            'mild_pain_symptoms': 'Mild pain / Other mild symptoms',
+            'other': 'Something else - describe below',
+            '': '-- Select Main Symptom --'
+        },
+        'alertness': {
+            'A': 'Fully awake and alert',
+            'V': 'Drowsy or a bit confused, but respond',
+            'P': 'Very confused / Difficult to wake up',
+            'U': 'Unresponsive / Unconscious'
+        },
+        'breathing-difficulty': {
+            'none': 'No trouble', 'mild': 'Mild trouble',
+            'moderate': 'Moderate trouble', 'severe': 'Severe trouble',
+            'cannot_breathe': 'Cannot breathe at all'
+        },
+        'bleeding': {
+            'none': 'None', 'minor': 'Minor - stops easily',
+            'moderate': 'Moderate - needs pressure',
+            'severe': 'Severe - hard to stop'
+        },
+        'dehydration': {
+            'none': 'No', 'mild': 'A little',
+            'moderate': 'Yes, moderately', 'severe': 'Yes, severely'
+        },
+        'feverish': {
+            'no': 'No', 'yes_mild_mod': 'Yes, mild/moderate',
+            'yes_high': 'Yes, high', 'unsure': 'Unsure'
+        },
+        'trauma_occurred': {
+            'no': 'No', 'yes_minor': 'Yes, minor injury',
+            'yes_significant': 'Yes, serious accident/injury'
+        }
+    }
+
+    # Select the correct mapping based on tool_type and language
+    if tool_type == 'professional':
+        mapping_to_use = professional_mapping_ar if lang == 'ar' else professional_mapping_en
+    else:
+        mapping_to_use = self_assessment_mapping_ar if lang == 'ar' else self_assessment_mapping_en
+    
     return mapping_to_use.get(field_id, {}).get(value, value) # Return original value if not found
 
 @app.route('/')
 def index():
     # Get language preference from session or default
     lang = session.get('language', DEFAULT_LANGUAGE)
-    theme = session.get('theme', DEFAULT_THEME)
-    return render_template('professional_triage.html', lang=lang, theme=theme)
+    return render_template('professional_triage.html', lang=lang)
 
 @app.route('/reference')
 def reference_page():
     """Serves the vital sign reference page."""
     lang = session.get('language', DEFAULT_LANGUAGE)
-    theme = session.get('theme', DEFAULT_THEME)
-    return render_template('reference.html', lang=lang, theme=theme)
+    return render_template('reference.html', lang=lang)
 
 @app.route('/self_diagnosis')
 def self_diagnosis_page():
     """Serves the patient self-diagnosis page."""
     lang = session.get('language', DEFAULT_LANGUAGE)
-    theme = session.get('theme', DEFAULT_THEME)
-    return render_template('self_assessment.html', lang=lang, theme=theme)
+    return render_template('self_assessment.html', lang=lang)
 
 @app.route('/set_language', methods=['POST'])
 def set_language():
@@ -363,70 +460,72 @@ def set_language():
         return jsonify({'status': 'success', 'language': lang})
     return jsonify({'status': 'error', 'message': 'Unsupported language'}), 400
 
-@app.route('/set_theme', methods=['POST'])
-def set_theme():
-    """Set user's theme preference."""
-    theme = request.json.get('theme', DEFAULT_THEME)
-    if theme in ['light', 'dark']:
-        session['theme'] = theme
-        return jsonify({'status': 'success', 'theme': theme})
-    return jsonify({'status': 'error', 'message': 'Invalid theme'}), 400
-
 @app.route('/calculate_ctas', methods=['POST'])
 def calculate_ctas_route():
     try:
         data = request.form.to_dict()
         ctas_level = calculate_ctas_logic(data)
+        lang = session.get('language', DEFAULT_LANGUAGE)
 
         # Prepare summary data for JSON response
         summary_data = {
             'name': data.get('patient_name', 'N/A'),
             'age': data.get('patient_age', 'N/A'),
-            'gender': get_text_from_value('patient-gender', data.get('patient_gender'), 'professional'),
+            'gender': get_text_from_value('patient-gender', data.get('patient_gender'), 'professional', lang),
             'id': data.get('patient_id', 'N/A'),
-            'complaint': get_text_from_value('chief-complaint', data.get('chief_complaint'), 'professional'),
+            'complaint': get_text_from_value('chief-complaint', data.get('chief_complaint'), 'professional', lang),
             'complaint_details': data.get('complaint_details', 'N/A'),
             'vitals': f"HR: {data.get('heart_rate', 'N/A')}, RR: {data.get('resp_rate', 'N/A')}, SpO2: {data.get('spo2', 'N/A')}%, BP: {data.get('bp_systolic', 'N/A')}/{data.get('bp_diastolic', 'N/A')}, Temp: {data.get('temperature', 'N/A')}°C",
             'loc': f"GCS: {data.get('gcs_score', 'N/A')}" + (f" (AVPU: {data.get('avpu')})" if data.get('avpu') else '') if data.get('gcs_score') else (f"AVPU: {data.get('avpu')}" if data.get('avpu') else 'N/A'),
             'pain': data.get('pain_score', '0'),
-            'resp_distress': get_text_from_value('respiratory-distress', data.get('respiratory_distress'), 'professional'),
-            'bleeding': get_text_from_value('bleeding', data.get('bleeding'), 'professional'),
-            'moi': get_text_from_value('mechanism-injury', data.get('mechanism_injury'), 'professional'),
+            'resp_distress': get_text_from_value('respiratory-distress', data.get('respiratory_distress'), 'professional', lang),
+            'bleeding': get_text_from_value('bleeding', data.get('bleeding'), 'professional', lang),
+            'moi': get_text_from_value('mechanism-injury', data.get('mechanism_injury'), 'professional', lang),
             'glucose': data.get('glucose', 'N/A'),
-            'dehydration': get_text_from_value('dehydration', data.get('dehydration'), 'professional'),
+            'dehydration': get_text_from_value('dehydration', data.get('dehydration'), 'professional', lang),
             'heat_exposure': data.get('heat_exposure', 'N/A'),
             'diabetes': data.get('has_diabetes', 'N/A'),
             'ctas_level': ctas_level,
-            'wait_time_estimate': get_wait_time_estimate(ctas_level)
+            'wait_time_estimate': get_wait_time_estimate(ctas_level, lang),
+            'lang': lang
         }
         return jsonify(summary_data)
     except Exception as e:
         app.logger.error(f"Error in calculate_ctas: {str(e)}")
         return jsonify({'error': 'An error occurred processing your request'}), 500
 
-def get_wait_time_estimate(ctas_level):
+def get_wait_time_estimate(ctas_level, lang='ar'):
     """Get estimated wait time based on CTAS level."""
-    wait_times = {
-        1: "فوري (Immediate)",
-        2: "≤ 15 دقيقة (≤ 15 minutes)",
-        3: "≤ 30 دقيقة (≤ 30 minutes)",
-        4: "≤ 60 دقيقة (≤ 60 minutes)",
-        5: "≤ 120 دقيقة (≤ 120 minutes)"
+    wait_times_ar = {
+        1: "فوري",
+        2: "≤ 15 دقيقة",
+        3: "≤ 30 دقيقة",
+        4: "≤ 60 دقيقة",
+        5: "≤ 120 دقيقة"
     }
+    wait_times_en = {
+        1: "Immediate",
+        2: "≤ 15 minutes",
+        3: "≤ 30 minutes",
+        4: "≤ 60 minutes",
+        5: "≤ 120 minutes"
+    }
+    wait_times = wait_times_ar if lang == 'ar' else wait_times_en
     return wait_times.get(ctas_level, "N/A")
 
 @app.route('/download_csv', methods=['POST'])
 def download_csv_route():
     data = request.form.to_dict()
     ctas_level = calculate_ctas_logic(data)
+    lang = session.get('language', DEFAULT_LANGUAGE)
 
     # Prepare data for CSV, getting text values
     csv_data = {
         'Patient Name': data.get('patient_name', ''),
         'Age': data.get('patient_age', ''),
-        'Gender': get_text_from_value('patient-gender', data.get('patient_gender'), 'professional'),
+        'Gender': get_text_from_value('patient-gender', data.get('patient_gender'), 'professional', lang),
         'ID/MRN': data.get('patient_id', ''),
-        'Chief Complaint': get_text_from_value('chief-complaint', data.get('chief_complaint'), 'professional'),
+        'Chief Complaint': get_text_from_value('chief-complaint', data.get('chief_complaint'), 'professional', lang),
         'Complaint Details': data.get('complaint_details', ''),
         'Heart Rate': data.get('heart_rate', ''),
         'Resp Rate': data.get('resp_rate', ''),
@@ -437,11 +536,11 @@ def download_csv_route():
         'GCS Score': data.get('gcs_score', ''),
         'AVPU': data.get('avpu', ''),
         'Pain Score': data.get('pain_score', ''),
-        'Respiratory Distress': get_text_from_value('respiratory-distress', data.get('respiratory_distress'), 'professional'),
-        'Bleeding': get_text_from_value('bleeding', data.get('bleeding'), 'professional'),
-        'Mechanism of Injury': get_text_from_value('mechanism-injury', data.get('mechanism_injury'), 'professional'),
+        'Respiratory Distress': get_text_from_value('respiratory-distress', data.get('respiratory_distress'), 'professional', lang),
+        'Bleeding': get_text_from_value('bleeding', data.get('bleeding'), 'professional', lang),
+        'Mechanism of Injury': get_text_from_value('mechanism-injury', data.get('mechanism_injury'), 'professional', lang),
         'Glucose': data.get('glucose', ''),
-        'Dehydration Signs': get_text_from_value('dehydration', data.get('dehydration'), 'professional'),
+        'Dehydration Signs': get_text_from_value('dehydration', data.get('dehydration'), 'professional', lang),
         'CTAS Level (Preliminary)': ctas_level
     }
 
@@ -484,6 +583,7 @@ def download_csv_route():
 @app.route('/calculate_self_assessment', methods=['POST'])
 def calculate_self_assessment_route():
     data = request.form.to_dict()
+    lang = session.get('language', DEFAULT_LANGUAGE)
     
     # Calculate CTAS level using the same logic
     ctas_level = calculate_ctas_logic(data)
@@ -524,87 +624,121 @@ def calculate_self_assessment_route():
         data['chief_complaint'] = 'minor_trauma'
         
     # Calculate recommendations based on CTAS level
-    recommendation_html = generate_recommendation(ctas_level, main_symptom)
+    recommendation_html = generate_recommendation(ctas_level, main_symptom, lang)
     
     # Prepare summary data for JSON response
     summary_data = {
         'age': data.get('patient_age', 'N/A'),
-        'gender': get_text_from_value('patient-gender', data.get('patient_gender'), 'self_assessment'),
-        'main_symptom': get_text_from_value('main-symptom', main_symptom, 'self_assessment'),
+        'gender': get_text_from_value('patient-gender', data.get('patient_gender'), 'self_assessment', lang),
+        'main_symptom': get_text_from_value('main-symptom', main_symptom, 'self_assessment', lang),
         'symptom_details': data.get('symptom_details', 'N/A'),
-        'alertness': get_text_from_value('alertness', data.get('alertness', ''), 'self_assessment'),
-        'breathing': get_text_from_value('breathing-difficulty', data.get('breathing_difficulty', ''), 'self_assessment'),
+        'alertness': get_text_from_value('alertness', data.get('alertness', ''), 'self_assessment', lang),
+        'breathing': get_text_from_value('breathing-difficulty', data.get('breathing_difficulty', ''), 'self_assessment', lang),
         'pain': data.get('pain_score', '0'),
-        'bleeding': get_text_from_value('bleeding', data.get('bleeding', ''), 'self_assessment'),
-        'dehydration': get_text_from_value('dehydration', data.get('dehydration', ''), 'self_assessment'),
-        'feverish': get_text_from_value('feverish', data.get('feverish', ''), 'self_assessment'),
-        'trauma': get_text_from_value('trauma_occurred', data.get('trauma_occurred', ''), 'self_assessment'),
-        'diabetes': get_text_from_value('has-diabetes', data.get('has_diabetes', ''), 'self_assessment'),
+        'bleeding': get_text_from_value('bleeding', data.get('bleeding', ''), 'self_assessment', lang),
+        'dehydration': get_text_from_value('dehydration', data.get('dehydration', ''), 'self_assessment', lang),
+        'feverish': get_text_from_value('feverish', data.get('feverish', ''), 'self_assessment', lang),
+        'trauma': get_text_from_value('trauma_occurred', data.get('trauma_occurred', ''), 'self_assessment', lang),
+        'diabetes': get_text_from_value('has-diabetes', data.get('has_diabetes', ''), 'self_assessment', lang),
         'glucose': data.get('glucose', 'N/A'),
         'level': ctas_level,
-        'recommendation': recommendation_html
+        'recommendation': recommendation_html,
+        'lang': lang
     }
     
     return jsonify(summary_data)
 
-def generate_recommendation(ctas_level, main_symptom):
+def generate_recommendation(ctas_level, main_symptom, lang='ar'):
     """Generate HTML recommendation based on CTAS level and symptoms for healthcare center use."""
     
-    if ctas_level == 1:
-        return """
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
-            <p class="font-bold text-lg">🚨 CTAS I - حالة طارئة (Resuscitation)</p>
-            <p>هذه الأعراض تشير إلى حالة طبية طارئة تتطلب رعاية فورية.</p>
-            <p class="font-bold mt-2">يجب تقييم المريض فوراً من قبل الطبيب - أولوية قصوى</p>
-            <p class="mt-2">These symptoms indicate a medical emergency requiring immediate care.</p>
-            <p class="font-bold">Patient requires immediate physician assessment - highest priority</p>
-        </div>
-        """
-    elif ctas_level == 2:
-        return """
-        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-md">
-            <p class="font-bold text-lg">⚠️ CTAS II - حالة عاجلة (Emergent)</p>
-            <p>هذه الأعراض تشير إلى حالة طبية عاجلة تتطلب تقييم سريع.</p>
-            <p class="font-bold mt-2">يجب رؤية الطبيب خلال 15 دقيقة</p>
-            <p class="mt-2">These symptoms indicate an urgent medical condition requiring prompt care.</p>
-            <p class="font-bold">Patient should be seen by physician within 15 minutes</p>
-        </div>
-        """
-    elif ctas_level == 3:
-        return """
-        <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 rounded-md">
-            <p class="font-bold text-lg">⚠️ CTAS III - حالة مستعجلة (Urgent)</p>
-            <p>هذه الأعراض تشير إلى حالة تتطلب تقييم طبي خلال 30 دقيقة.</p>
-            <p class="font-bold mt-2">يرجى الانتظار في منطقة الانتظار - ستتم رؤية المريض قريباً</p>
-            <p class="mt-2">These symptoms indicate a condition requiring medical assessment within 30 minutes.</p>
-            <p class="font-bold">Please wait in waiting area - patient will be seen soon</p>
-        </div>
-        """
-    elif ctas_level == 4:
-        return """
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
-            <p class="font-bold text-lg">ℹ️ CTAS IV - أقل استعجالاً (Less Urgent)</p>
-            <p>هذه الأعراض تشير إلى حالة تتطلب تقييم طبي خلال 60 دقيقة.</p>
-            <p class="font-bold mt-2">يرجى الانتظار - الوقت المتوقع للانتظار أقل من ساعة</p>
-            <p class="mt-2">These symptoms indicate a condition requiring medical assessment within 60 minutes.</p>
-            <p class="font-bold">Please wait - expected wait time less than one hour</p>
-        </div>
-        """
-    else:  # CTAS 5
-        return """
-        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md">
-            <p class="font-bold text-lg">ℹ️ CTAS V - غير عاجل (Non-Urgent)</p>
-            <p>هذه الأعراض لا تشير إلى حالة طارئة في الوقت الحالي.</p>
-            <p class="font-bold mt-2">يرجى الانتظار - الوقت المتوقع للانتظار أقل من ساعتين</p>
-            <p class="mt-2">These symptoms do not indicate an emergency at this time.</p>
-            <p class="font-bold">Please wait - expected wait time less than two hours</p>
-        </div>
-        """
+    if lang == 'ar':
+        if ctas_level == 1:
+            return """
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+                <p class="font-bold text-lg">🚨 CTAS I - حالة طارئة</p>
+                <p>هذه الأعراض تشير إلى حالة طبية طارئة تتطلب رعاية فورية.</p>
+                <p class="font-bold mt-2">يجب تقييم المريض فوراً من قبل الطبيب - أولوية قصوى</p>
+            </div>
+            """
+        elif ctas_level == 2:
+            return """
+            <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-md">
+                <p class="font-bold text-lg">⚠️ CTAS II - حالة عاجلة</p>
+                <p>هذه الأعراض تشير إلى حالة طبية عاجلة تتطلب تقييم سريع.</p>
+                <p class="font-bold mt-2">يجب رؤية الطبيب خلال 15 دقيقة</p>
+            </div>
+            """
+        elif ctas_level == 3:
+            return """
+            <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 rounded-md">
+                <p class="font-bold text-lg">⚠️ CTAS III - حالة مستعجلة</p>
+                <p>هذه الأعراض تشير إلى حالة تتطلب تقييم طبي خلال 30 دقيقة.</p>
+                <p class="font-bold mt-2">يرجى الانتظار في منطقة الانتظار - ستتم رؤية المريض قريباً</p>
+            </div>
+            """
+        elif ctas_level == 4:
+            return """
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
+                <p class="font-bold text-lg">ℹ️ CTAS IV - أقل استعجالاً</p>
+                <p>هذه الأعراض تشير إلى حالة تتطلب تقييم طبي خلال 60 دقيقة.</p>
+                <p class="font-bold mt-2">يرجى الانتظار - الوقت المتوقع للانتظار أقل من ساعة</p>
+            </div>
+            """
+        else:  # CTAS 5
+            return """
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md">
+                <p class="font-bold text-lg">ℹ️ CTAS V - غير عاجل</p>
+                <p>هذه الأعراض لا تشير إلى حالة طارئة في الوقت الحالي.</p>
+                <p class="font-bold mt-2">يرجى الانتظار - الوقت المتوقع للانتظار أقل من ساعتين</p>
+            </div>
+            """
+    else:  # English
+        if ctas_level == 1:
+            return """
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+                <p class="font-bold text-lg">🚨 CTAS I - Resuscitation</p>
+                <p>These symptoms indicate a medical emergency requiring immediate care.</p>
+                <p class="font-bold mt-2">Patient requires immediate physician assessment - highest priority</p>
+            </div>
+            """
+        elif ctas_level == 2:
+            return """
+            <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-md">
+                <p class="font-bold text-lg">⚠️ CTAS II - Emergent</p>
+                <p>These symptoms indicate an urgent medical condition requiring prompt care.</p>
+                <p class="font-bold mt-2">Patient should be seen by physician within 15 minutes</p>
+            </div>
+            """
+        elif ctas_level == 3:
+            return """
+            <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 rounded-md">
+                <p class="font-bold text-lg">⚠️ CTAS III - Urgent</p>
+                <p>These symptoms indicate a condition requiring medical assessment within 30 minutes.</p>
+                <p class="font-bold mt-2">Please wait in waiting area - patient will be seen soon</p>
+            </div>
+            """
+        elif ctas_level == 4:
+            return """
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
+                <p class="font-bold text-lg">ℹ️ CTAS IV - Less Urgent</p>
+                <p>These symptoms indicate a condition requiring medical assessment within 60 minutes.</p>
+                <p class="font-bold mt-2">Please wait - expected wait time less than one hour</p>
+            </div>
+            """
+        else:  # CTAS 5
+            return """
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md">
+                <p class="font-bold text-lg">ℹ️ CTAS V - Non-Urgent</p>
+                <p>These symptoms do not indicate an emergency at this time.</p>
+                <p class="font-bold mt-2">Please wait - expected wait time less than two hours</p>
+            </div>
+            """
 
 @app.route('/download_self_assessment_csv', methods=['POST'])
 def download_self_assessment_csv_route():
     data = request.form.to_dict()
     ctas_level = calculate_ctas_logic(data)
+    lang = session.get('language', DEFAULT_LANGUAGE)
     
     # Map alertness to AVPU for calculation
     data['avpu'] = data.get('alertness', 'A')
@@ -612,17 +746,17 @@ def download_self_assessment_csv_route():
     # Prepare data for CSV, getting text values using the self-assessment mappings
     csv_data = {
         'Age': data.get('patient_age', ''),
-        'Gender': get_text_from_value('patient-gender', data.get('patient_gender', ''), 'self_assessment'),
-        'Main Symptom': get_text_from_value('main-symptom', data.get('main_symptom', ''), 'self_assessment'),
+        'Gender': get_text_from_value('patient-gender', data.get('patient_gender', ''), 'self_assessment', lang),
+        'Main Symptom': get_text_from_value('main-symptom', data.get('main_symptom', ''), 'self_assessment', lang),
         'Symptom Details': data.get('symptom_details', ''),
-        'Alertness Level': get_text_from_value('alertness', data.get('alertness', ''), 'self_assessment'),
-        'Breathing Difficulty': get_text_from_value('breathing-difficulty', data.get('breathing_difficulty', ''), 'self_assessment'),
+        'Alertness Level': get_text_from_value('alertness', data.get('alertness', ''), 'self_assessment', lang),
+        'Breathing Difficulty': get_text_from_value('breathing-difficulty', data.get('breathing_difficulty', ''), 'self_assessment', lang),
         'Pain Score': data.get('pain_score', ''),
-        'Bleeding': get_text_from_value('bleeding', data.get('bleeding', ''), 'self_assessment'),
-        'Dehydration Signs': get_text_from_value('dehydration', data.get('dehydration', ''), 'self_assessment'),
-        'Fever': get_text_from_value('feverish', data.get('feverish', ''), 'self_assessment'),
-        'Recent Trauma': get_text_from_value('trauma_occurred', data.get('trauma_occurred', ''), 'self_assessment'),
-        'Diabetes': get_text_from_value('has-diabetes', data.get('has_diabetes', ''), 'self_assessment'),
+        'Bleeding': get_text_from_value('bleeding', data.get('bleeding', ''), 'self_assessment', lang),
+        'Dehydration Signs': get_text_from_value('dehydration', data.get('dehydration', ''), 'self_assessment', lang),
+        'Fever': get_text_from_value('feverish', data.get('feverish', ''), 'self_assessment', lang),
+        'Recent Trauma': get_text_from_value('trauma_occurred', data.get('trauma_occurred', ''), 'self_assessment', lang),
+        'Diabetes': get_text_from_value('has-diabetes', data.get('has_diabetes', ''), 'self_assessment', lang),
         'Blood Glucose': data.get('glucose', ''),
         'CTAS Level (Preliminary)': ctas_level,
         'Assessment Date/Time': datetime.now().strftime("%Y-%m-%d %H:%M")
