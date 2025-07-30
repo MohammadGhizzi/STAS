@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خطأ في الخادم - Server Error</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [dir="rtl"] { text-align: right; }
+        [dir="ltr"] { text-align: left; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="text-center">
+        <div class="mb-8">
+            <h1 class="text-9xl font-bold text-red-300">500</h1>
+        </div>
+        
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">
+                <span class="ar-text">خطأ في الخادم</span>
+                <span class="en-text hidden">Server Error</span>
+            </h2>
+            <p class="text-gray-600">
+                <span class="ar-text">عذراً، حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.</span>
+                <span class="en-text hidden">Sorry, a server error occurred. Please try again later.</span>
+            </p>
+        </div>
+        
+        <div class="space-x-4">
+            <a href="/" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 inline-block">
+                <span class="ar-text">العودة للصفحة الرئيسية</span>
+                <span class="en-text hidden">Back to Home</span>
+            </a>
+            
+            <button onclick="toggleLanguage()" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                <span class="ar-text">English</span>
+                <span class="en-text hidden">العربية</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentLang = 'ar';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            
+            document.querySelectorAll('.ar-text').forEach(el => {
+                el.classList.toggle('hidden', currentLang !== 'ar');
+            });
+            document.querySelectorAll('.en-text').forEach(el => {
+                el.classList.toggle('hidden', currentLang !== 'en');
+            });
+        }
+    </script>
+</body>
+</html> 

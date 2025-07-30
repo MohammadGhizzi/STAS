@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مرجع العلامات الحيوية - Vital Signs Reference</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [dir="rtl"] { text-align: right; }
+        [dir="ltr"] { text-align: left; }
+        .dark { background-color: #1a1a1a; color: #ffffff; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+                    <span class="ar-text">مرجع العلامات الحيوية والـ CTAS</span>
+                    <span class="en-text hidden">Vital Signs & CTAS Reference</span>
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    <span class="ar-text">دليل مرجعي للقيم الطبيعية والمقياس الكندي للفرز وحدة الرعاية</span>
+                    <span class="en-text hidden">Reference guide for normal values and Canadian Triage and Acuity Scale</span>
+                </p>
+                
+                <div class="mt-6 flex justify-between items-center">
+                    <div class="flex gap-2">
+                        <button onclick="toggleLanguage()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                            <span id="langButton">EN</span>
+                        </button>
+                        <button onclick="toggleTheme()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">
+                            <span id="themeButton">🌙</span>
+                        </button>
+                    </div>
+                    <a href="/" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                        <span class="ar-text">العودة للرئيسية</span>
+                        <span class="en-text hidden">Back to Main</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTAS Levels Reference -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                <span class="ar-text">مستويات الـ CTAS</span>
+                <span class="en-text hidden">CTAS Levels</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                <div class="bg-red-100 dark:bg-red-900 p-4 rounded-lg border-l-4 border-red-500">
+                    <h3 class="font-bold text-red-800 dark:text-red-200">
+                        <span class="ar-text">CTAS I - فوري</span>
+                        <span class="en-text hidden">CTAS I - Resuscitation</span>
+                    </h3>
+                    <p class="text-red-700 dark:text-red-300 text-sm">
+                        <span class="ar-text">حالات تهدد الحياة تتطلب تدخلاً فورياً</span>
+                        <span class="en-text hidden">Life-threatening conditions requiring immediate intervention</span>
+                    </p>
+                </div>
+                
+                <div class="bg-orange-100 dark:bg-orange-900 p-4 rounded-lg border-l-4 border-orange-500">
+                    <h3 class="font-bold text-orange-800 dark:text-orange-200">
+                        <span class="ar-text">CTAS II - عاجل</span>
+                        <span class="en-text hidden">CTAS II - Emergent</span>
+                    </h3>
+                    <p class="text-orange-700 dark:text-orange-300 text-sm">
+                        <span class="ar-text">≤ 15 دقيقة - حالات طارئة</span>
+                        <span class="en-text hidden">≤ 15 minutes - Emergency conditions</span>
+                    </p>
+                </div>
+                
+                <div class="bg-yellow-100 dark:bg-yellow-900 p-4 rounded-lg border-l-4 border-yellow-500">
+                    <h3 class="font-bold text-yellow-800 dark:text-yellow-200">
+                        <span class="ar-text">CTAS III - مستعجل</span>
+                        <span class="en-text hidden">CTAS III - Urgent</span>
+                    </h3>
+                    <p class="text-yellow-700 dark:text-yellow-300 text-sm">
+                        <span class="ar-text">≤ 30 دقيقة - حالات مستعجلة</span>
+                        <span class="en-text hidden">≤ 30 minutes - Urgent conditions</span>
+                    </p>
+                </div>
+                
+                <div class="bg-green-100 dark:bg-green-900 p-4 rounded-lg border-l-4 border-green-500">
+                    <h3 class="font-bold text-green-800 dark:text-green-200">
+                        <span class="ar-text">CTAS IV - أقل استعجالاً</span>
+                        <span class="en-text hidden">CTAS IV - Less Urgent</span>
+                    </h3>
+                    <p class="text-green-700 dark:text-green-300 text-sm">
+                        <span class="ar-text">≤ 60 دقيقة - حالات أقل استعجالاً</span>
+                        <span class="en-text hidden">≤ 60 minutes - Less urgent conditions</span>
+                    </p>
+                </div>
+                
+                <div class="bg-blue-100 dark:bg-blue-900 p-4 rounded-lg border-l-4 border-blue-500">
+                    <h3 class="font-bold text-blue-800 dark:text-blue-200">
+                        <span class="ar-text">CTAS V - غير عاجل</span>
+                        <span class="en-text hidden">CTAS V - Non-Urgent</span>
+                    </h3>
+                    <p class="text-blue-700 dark:text-blue-300 text-sm">
+                        <span class="ar-text">≤ 120 دقيقة - حالات غير عاجلة</span>
+                        <span class="en-text hidden">≤ 120 minutes - Non-urgent conditions</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Normal Vital Signs by Age -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <span class="ar-text">العلامات الحيوية الطبيعية حسب العمر</span>
+                <span class="en-text hidden">Normal Vital Signs by Age</span>
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm border-collapse border border-gray-300 dark:border-gray-600">
+                    <thead class="bg-gray-100 dark:bg-gray-700">
+                        <tr>
+                            <th class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">الفئة العمرية</span>
+                                <span class="en-text hidden">Age Group</span>
+                            </th>
+                            <th class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">النبض (ن/د)</span>
+                                <span class="en-text hidden">Heart Rate (bpm)</span>
+                            </th>
+                            <th class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">التنفس (ت/د)</span>
+                                <span class="en-text hidden">Resp Rate (rpm)</span>
+                            </th>
+                            <th class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">ضغط الدم الانقباضي</span>
+                                <span class="en-text hidden">Systolic BP</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">الرضيع (0-1 سنة)</span>
+                                <span class="en-text hidden">Infant (0-1 year)</span>
+                            </td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">80-160</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">30-60</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">70-100</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">طفل صغير (1-3 سنوات)</span>
+                                <span class="en-text hidden">Toddler (1-3 years)</span>
+                            </td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">70-150</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">24-40</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">75-105</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">ما قبل المدرسة (3-6 سنوات)</span>
+                                <span class="en-text hidden">Preschool (3-6 years)</span>
+                            </td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">60-130</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">22-34</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">80-110</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">سن المدرسة (6-13 سنة)</span>
+                                <span class="en-text hidden">School Age (6-13 years)</span>
+                            </td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">50-120</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">18-30</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">85-120</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">المراهق (13-18 سنة)</span>
+                                <span class="en-text hidden">Adolescent (13-18 years)</span>
+                            </td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">50-100</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">12-26</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">90-130</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">
+                                <span class="ar-text">البالغ (18+ سنة)</span>
+                                <span class="en-text hidden">Adult (18+ years)</span>
+                            </td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">50-100</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">12-20</td>
+                            <td class="border border-gray-300 dark:border-gray-600 p-2">90-140</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Critical Values -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <span class="ar-text">القيم الحرجة</span>
+                <span class="en-text hidden">Critical Values</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Oxygen Saturation -->
+                <div>
+                    <h3 class="font-semibold mb-2 text-red-600">
+                        <span class="ar-text">تشبع الأكسجين (SpO2)</span>
+                        <span class="en-text hidden">Oxygen Saturation (SpO2)</span>
+                    </h3>
+                    <ul class="text-sm space-y-1">
+                        <li>
+                            <span class="ar-text">طبيعي: ≥95%</span>
+                            <span class="en-text hidden">Normal: ≥95%</span>
+                        </li>
+                        <li>
+                            <span class="ar-text">منخفض معتدل: 90-94%</span>
+                            <span class="en-text hidden">Mild hypoxia: 90-94%</span>
+                        </li>
+                        <li class="text-red-600 font-semibold">
+                            <span class="ar-text">حرج: <90%</span>
+                            <span class="en-text hidden">Critical: <90%</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Glasgow Coma Scale -->
+                <div>
+                    <h3 class="font-semibold mb-2 text-red-600">
+                        <span class="ar-text">مقياس غلاسكو للوعي (GCS)</span>
+                        <span class="en-text hidden">Glasgow Coma Scale (GCS)</span>
+                    </h3>
+                    <ul class="text-sm space-y-1">
+                        <li>
+                            <span class="ar-text">طبيعي: 15</span>
+                            <span class="en-text hidden">Normal: 15</span>
+                        </li>
+                        <li>
+                            <span class="ar-text">انخفاض خفيف: 13-14</span>
+                            <span class="en-text hidden">Mild impairment: 13-14</span>
+                        </li>
+                        <li>
+                            <span class="ar-text">انخفاض متوسط: 9-12</span>
+                            <span class="en-text hidden">Moderate impairment: 9-12</span>
+                        </li>
+                        <li class="text-red-600 font-semibold">
+                            <span class="ar-text">حرج: <9</span>
+                            <span class="en-text hidden">Critical: <9</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pain Scale -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <span class="ar-text">مقياس الألم</span>
+                <span class="en-text hidden">Pain Scale</span>
+            </h2>
+            
+            <div class="grid grid-cols-11 gap-2 mb-4">
+                <div class="text-center text-xs">0</div>
+                <div class="text-center text-xs">1</div>
+                <div class="text-center text-xs">2</div>
+                <div class="text-center text-xs">3</div>
+                <div class="text-center text-xs">4</div>
+                <div class="text-center text-xs">5</div>
+                <div class="text-center text-xs">6</div>
+                <div class="text-center text-xs">7</div>
+                <div class="text-center text-xs">8</div>
+                <div class="text-center text-xs">9</div>
+                <div class="text-center text-xs">10</div>
+            </div>
+            
+            <div class="grid grid-cols-11 gap-2 mb-4">
+                <div class="h-4 bg-green-500 rounded"></div>
+                <div class="h-4 bg-green-400 rounded"></div>
+                <div class="h-4 bg-green-300 rounded"></div>
+                <div class="h-4 bg-yellow-300 rounded"></div>
+                <div class="h-4 bg-yellow-400 rounded"></div>
+                <div class="h-4 bg-yellow-500 rounded"></div>
+                <div class="h-4 bg-orange-400 rounded"></div>
+                <div class="h-4 bg-orange-500 rounded"></div>
+                <div class="h-4 bg-red-400 rounded"></div>
+                <div class="h-4 bg-red-500 rounded"></div>
+                <div class="h-4 bg-red-600 rounded"></div>
+            </div>
+            
+            <div class="text-sm space-y-1">
+                <div class="flex justify-between">
+                    <span class="ar-text">لا يوجد ألم (0)</span>
+                    <span class="en-text hidden">No pain (0)</span>
+                    <span class="ar-text">ألم خفيف (1-3)</span>
+                    <span class="en-text hidden">Mild pain (1-3)</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="ar-text">ألم متوسط (4-6)</span>
+                    <span class="en-text hidden">Moderate pain (4-6)</span>
+                    <span class="ar-text">ألم شديد (7-10)</span>
+                    <span class="en-text hidden">Severe pain (7-10)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLang = 'ar';
+        let currentTheme = 'light';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            
+            document.querySelectorAll('.ar-text').forEach(el => {
+                el.classList.toggle('hidden', currentLang !== 'ar');
+            });
+            document.querySelectorAll('.en-text').forEach(el => {
+                el.classList.toggle('hidden', currentLang !== 'en');
+            });
+
+            // Save language preference
+            fetch('/set_language', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({language: currentLang})
+            });
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.classList.toggle('dark', currentTheme === 'dark');
+            
+            // Save theme preference
+            fetch('/set_theme', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({theme: currentTheme})
+            });
+        }
+
+        // Initialize theme and language from server
+        document.addEventListener('DOMContentLoaded', function() {
+            const lang = '{{ lang }}' || 'ar';
+            const theme = '{{ theme }}' || 'light';
+            
+            if (lang !== 'ar') {
+                toggleLanguage();
+            }
+            if (theme === 'dark') {
+                toggleTheme();
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'CTAS Triage Tool' if lang == 'en' else 'أداة فحص المرضى' }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        [dir="rtl"] { text-align: right; }
+        [dir="ltr"] { text-align: left; }
+        .ctas-level-1 { background-color: #ef4444; color: white; }
+        .ctas-level-2 { background-color: #f97316; color: white; }
+        .ctas-level-3 { background-color: #f59e0b; color: white; }
+        .ctas-level-4 { background-color: #10b981; color: white; }
+        .ctas-level-5 { background-color: #3b82f6; color: white; }
+        /* Style for hiding sections */
+        .hidden-section {
+            display: none;
+        }
+        /* Basic styling for printable view */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            button {
+                display: none;
+            }
+        }
+        /* Custom focus ring style */
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px #3b82f6;
+            border-color: #3b82f6;
+        }
+        /* Mobile responsive improvements */
+        @media (max-width: 640px) {
+            .container {
+                padding: 0.5rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            h2 {
+                font-size: 1.25rem;
+            }
+            h3 {
+                font-size: 1.1rem;
+            }
+            button {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+        /* Larger text for accessibility */
+        label, legend {
+            font-size: 1.1rem;
+        }
+        input, select, button, textarea {
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            min-height: 44px;
+        }
+        button {
+            transition: background-color 0.2s ease-in-out;
+            min-height: 44px;
+        }
+        /* Enhanced accessibility improvements */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .border-gray-300 {
+                border-color: #000;
+                border-width: 2px;
+            }
+            .text-gray-600 {
+                color: #000;
+            }
+        }
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 transition-colors duration-300">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-3xl font-bold text-gray-800">
+                    {{ 'Advanced Patient Assessment Tool' if lang == 'en' else 'أداة فحص المرضى المتقدمة' }}
+                </h1>
+                <button onclick="toggleLanguage()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                    <span id="langButton">{{ 'عربي' if lang == 'en' else 'EN' }}</span>
+                </button>
+            </div>
+            <p class="text-lg text-gray-600 mb-4">
+                {% if lang == 'en' %}
+                    Advanced Patient Assessment Tool using CTAS (Canadian Triage and Acuity Scale)
+                {% else %}
+                    أداة تقييم المرضى باستخدام نظام CTAS (المقياس الكندي للفرز وحدة الرعاية)
+                {% endif %}
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                <a href="/self_diagnosis" class="block p-4 bg-green-100 rounded-lg hover:bg-green-200 transition-colors">
+                    <h3 class="font-bold text-green-800">{{ 'Self Assessment' if lang == 'en' else 'الفحص الذاتي' }}</h3>
+                    <p class="text-green-600 text-sm">{{ 'For patients - symptom assessment' if lang == 'en' else 'للمرضى - تقييم الأعراض' }}</p>
+                </a>
+                <a href="/reference" class="block p-4 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors">
+                    <h3 class="font-bold text-blue-800">{{ 'Vital Signs Reference' if lang == 'en' else 'مرجع العلامات الحيوية' }}</h3>
+                    <p class="text-blue-600 text-sm">{{ 'Normal values by age' if lang == 'en' else 'القيم الطبيعية حسب العمر' }}</p>
+                </a>
+                <a href="/health" class="block p-4 bg-purple-100 rounded-lg hover:bg-purple-200 transition-colors">
+                    <h3 class="font-bold text-purple-800">{{ 'System Status' if lang == 'en' else 'حالة النظام' }}</h3>
+                    <p class="text-purple-600 text-sm">{{ 'Service health check' if lang == 'en' else 'فحص صحة الخدمة' }}</p>
+                </a>
+            </div>
+        </div>
+
+        <form id="triage-form" role="form" aria-label="Medical Triage Assessment Form">
+
+            <section id="step-1" class="step-section border-b pb-8 mb-8" aria-labelledby="step-1-heading">
+                <h3 id="step-1-heading" class="text-2xl font-semibold mb-6 text-gray-700 {% if lang == 'en' %}border-l-4 pl-4{% else %}border-r-4 pr-4{% endif %} border-blue-500">{{ 'Step 1: Patient Information' if lang == 'en' else 'الخطوة 1: معلومات المريض' }}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="patient-name" class="block text-gray-700 font-medium mb-2">{{ 'Patient Name:' if lang == 'en' else 'اسم المريض:' }}</label>
+                        <input type="text" id="patient-name" name="patient_name" 
+                               class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500"
+                               aria-describedby="patient-name-help">
+                        <span id="patient-name-help" class="sr-only">{{ 'Enter the full name of the patient' if lang == 'en' else 'أدخل الاسم الكامل للمريض' }}</span>
+                    </div>
+                    <div>
+                        <label for="patient-age" class="block text-gray-700 font-medium mb-2">{{ 'Age:' if lang == 'en' else 'العمر:' }}</label>
+                        <input type="number" id="patient-age" name="patient_age" min="0" max="150"
+                               class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500"
+                               aria-describedby="patient-age-help">
+                        <span id="patient-age-help" class="sr-only">{{ 'Enter patient age in years' if lang == 'en' else 'أدخل عمر المريض بالسنوات' }}</span>
+                    </div>
+                    <div>
+                        <label for="patient-gender" class="block text-gray-700 font-medium mb-2">{{ 'Gender:' if lang == 'en' else 'الجنس:' }}</label>
+                        <select id="patient-gender" name="patient_gender" 
+                                class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500"
+                                aria-describedby="patient-gender-help">
+                            <option value="">{{ 'Select' if lang == 'en' else 'اختر' }}</option>
+                            <option value="male">{{ 'Male' if lang == 'en' else 'ذكر' }}</option>
+                            <option value="female">{{ 'Female' if lang == 'en' else 'أنثى' }}</option>
+                        </select>
+                        <span id="patient-gender-help" class="sr-only">{{ 'Select patient gender' if lang == 'en' else 'اختر جنس المريض' }}</span>
+                    </div>
+                     <div>
+                        <label for="patient-id" class="block text-gray-700 font-medium mb-2">{{ 'ID/MRN (Optional):' if lang == 'en' else 'رقم الهوية/الملف (اختياري):' }}</label>
+                        <input type="text" id="patient-id" name="patient_id" 
+                               class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500"
+                               aria-describedby="patient-id-help">
+                        <span id="patient-id-help" class="sr-only">{{ 'Enter patient ID or medical record number if available' if lang == 'en' else 'أدخل رقم هوية المريض أو رقم الملف الطبي إن وجد' }}</span>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button type="button" onclick="nextStep(1)" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            aria-label="{{ 'Proceed to next step' if lang == 'en' else 'الانتقال للخطوة التالية' }}">
+                        {{ 'Next' if lang == 'en' else 'التالي' }} {{ '→' if lang == 'en' else '←' }}
+                    </button>
+                </div>
+            </section>
+
+            <section id="step-2" class="step-section hidden-section border-b pb-8 mb-8" aria-labelledby="step-2-heading">
+                <h3 id="step-2-heading" class="text-2xl font-semibold mb-6 text-gray-700 {% if lang == 'en' %}border-l-4 pl-4{% else %}border-r-4 pr-4{% endif %} border-blue-500">{{ 'Step 2: Chief Complaint' if lang == 'en' else 'الخطوة 2: الشكوى الرئيسية' }}</h3>
+                 <div class="mb-6">
+                    <label for="chief-complaint" class="block text-gray-700 font-medium mb-2">{{ 'Select Chief Complaint:' if lang == 'en' else 'اختر الشكوى الرئيسية:' }}</label>
+                    <select id="chief-complaint" name="chief_complaint" 
+                            class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500"
+                            aria-describedby="chief-complaint-help">
+                        <option value="">{{ '-- Select Complaint --' if lang == 'en' else '-- اختر الشكوى --' }}</option>
+                        {% if lang == 'en' %}
+                        <option value="cardiac_arrest">Cardiac Arrest / VSA</option>
+                        <option value="resp_arrest">Respiratory Arrest</option>
+                        <option value="major_trauma">Major Trauma</option>
+                        <option value="chest_pain_cardiac">Chest Pain - Cardiac?</option>
+                        <option value="resp_distress_severe">Resp Distress - Severe</option>
+                        <option value="shock">Shock</option>
+                        <option value="loc_decreased">LOC Decreased</option>
+                        <option value="seizure_active">Seizure - Active</option>
+                        <option value="stroke">Stroke / CVA</option>
+                        <option value="anaphylaxis">Anaphylaxis</option>
+                        <option value="overdose">Overdose</option>
+                        <option value="sepsis">Sepsis</option>
+                        <option value="severe_pain">Severe Pain</option>
+                        <option value="resp_distress_moderate">Resp Distress - Moderate</option>
+                        <option value="abdominal_pain_severe">Abdominal Pain - Severe</option>
+                        <option value="head_injury_moderate">Head Injury - Moderate</option>
+                        <option value="vaginal_bleeding_heavy">Vaginal Bleeding - Heavy</option>
+                        <option value="fever_infant">Fever - Infant < 3mo</option>
+                        <option value="psych_severe">Psychiatric - Severe</option>
+                        <option value="minor_trauma">Minor Trauma</option>
+                        <option value="mild_pain">Mild Pain</option>
+                        <option value="vomiting_diarrhea_mild">Vomiting/Diarrhea - Mild</option>
+                        <option value="rash">Rash</option>
+                        <option value="other">Other - specify below</option>
+                        {% else %}
+                        <option value="cardiac_arrest">توقف القلب</option>
+                        <option value="resp_arrest">توقف التنفس</option>
+                        <option value="major_trauma">إصابة بليغة</option>
+                        <option value="chest_pain_cardiac">ألم في الصدر (يشتبه بالقلب)</option>
+                        <option value="resp_distress_severe">ضيق تنفس حاد</option>
+                        <option value="shock">صدمة</option>
+                        <option value="loc_decreased">انخفاض مستوى الوعي</option>
+                        <option value="seizure_active">تشنج نشط</option>
+                        <option value="stroke">جلطة دماغية</option>
+                        <option value="anaphylaxis">حساسية مفرطة</option>
+                        <option value="overdose">جرعة زائدة</option>
+                        <option value="sepsis">تسمم الدم</option>
+                        <option value="severe_pain">ألم شديد</option>
+                        <option value="resp_distress_moderate">ضيق تنفس متوسط</option>
+                        <option value="abdominal_pain_severe">ألم بطن شديد</option>
+                        <option value="head_injury_moderate">إصابة رأس متوسطة</option>
+                        <option value="vaginal_bleeding_heavy">نزيف مهبلي غزير</option>
+                        <option value="fever_infant">حمى (رضيع < 3 أشهر)</option>
+                        <option value="psych_severe">حالة نفسية حادة</option>
+                        <option value="minor_trauma">إصابة طفيفة</option>
+                        <option value="mild_pain">ألم خفيف</option>
+                        <option value="vomiting_diarrhea_mild">قيء/إسهال خفيف</option>
+                        <option value="rash">طفح جلدي</option>
+                        <option value="other">أخرى</option>
+                        {% endif %}
+                    </select>
+                    <span id="chief-complaint-help" class="sr-only">{{ 'Select the chief complaint' if lang == 'en' else 'اختر الشكوى الرئيسية' }}</span>
+                </div>
+                 <div class="mb-6">
+                    <label for="complaint-details" class="block text-gray-700 font-medium mb-2">{{ 'Additional Details:' if lang == 'en' else 'تفاصيل إضافية:' }}</label>
+                    <textarea id="complaint-details" name="complaint_details" rows="3" class="w-full border border-gray-300 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500"
+                              aria-describedby="complaint-details-help"></textarea>
+                    <span id="complaint-details-help" class="sr-only">{{ 'Enter additional details about the complaint' if lang == 'en' else 'أدخل تفاصيل إضافية عن الشكوى' }}</span>
+                </div>
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="prevStep(2)" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            aria-label="{{ 'Go back to previous step' if lang == 'en' else 'الرجوع للخطوة السابقة' }}">
+                        {{ '←' if lang == 'en' else '→' }} {{ 'Previous' if lang == 'en' else 'السابق' }}
+                    </button>
+                    <button type="button" onclick="nextStep(2)" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            aria-label="{{ 'Proceed to next step' if lang == 'en' else 'الانتقال للخطوة التالية' }}">
+                        {{ 'Next' if lang == 'en' else 'التالي' }} {{ '→' if lang == 'en' else '←' }}
+                    </button>
+                </div>
+            </section>
+
+            <section id="step-3" class="step-section hidden-section border-b pb-8 mb-8" aria-labelledby="step-3-heading">
+                <h3 id="step-3-heading" class="text-2xl font-semibold mb-6 text-gray-700 {% if lang == 'en' %}border-l-4 pl-4{% else %}border-r-4 pr-4{% endif %} border-blue-500">{{ 'Step 3: Initial Indicators (Vital Signs, LOC, Pain)' if lang == 'en' else 'الخطوة 3: المؤشرات الأولية (العلامات الحيوية، الوعي، الألم)' }}</h3>
+
+                <fieldset class="mb-6 border p-4 rounded-md">
+                    <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">{{ 'Vital Signs' if lang == 'en' else 'العلامات الحيوية' }}</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <label for="heart-rate" class="block text-gray-700 font-medium mb-1">
+                                {{ 'Heart Rate (HR):' if lang == 'en' else 'معدل النبض (HR):' }}
+                                <span class="text-sm text-gray-500 font-normal">
+                                    {{ '(Adult: 60-100 bpm)' if lang == 'en' else '(البالغ: 60-100 نبضة/دقيقة)' }}
+                                </span>
+                            </label>
+                            <input type="number" id="heart-rate" name="heart_rate" 
+                                   class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                   aria-describedby="heart-rate-hint" tabindex="1">
+                            <div id="heart-rate-hint" class="sr-only">{{ 'Enter heart rate in beats per minute' if lang == 'en' else 'أدخل معدل النبض بالنبضات في الدقيقة' }}</div>
+                        </div>
+                        <div>
+                            <label for="resp-rate" class="block text-gray-700 font-medium mb-1">
+                                {{ 'Resp Rate (RR):' if lang == 'en' else 'معدل التنفس (RR):' }}
+                                <span class="text-sm text-gray-500 font-normal">
+                                    {{ '(Adult: 12-20/min)' if lang == 'en' else '(البالغ: 12-20/دقيقة)' }}
+                                </span>
+                            </label>
+                            <input type="number" id="resp-rate" name="resp_rate" 
+                                   class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                   aria-describedby="resp-rate-hint" tabindex="2">
+                            <div id="resp-rate-hint" class="sr-only">{{ 'Enter respiratory rate per minute' if lang == 'en' else 'أدخل معدل التنفس في الدقيقة' }}</div>
+                        </div>
+                        <div>
+                            <label for="spo2" class="block text-gray-700 font-medium mb-1">
+                                {{ 'SpO2 (%):' if lang == 'en' else 'تشبع الأكسجين (SpO2 %):' }}
+                                <span class="text-sm text-gray-500 font-normal">
+                                    {{ '(Normal: >95%)' if lang == 'en' else '(طبيعي: >95%)' }}
+                                </span>
+                            </label>
+                            <input type="number" id="spo2" name="spo2" min="0" max="100" 
+                                   class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                   aria-describedby="spo2-hint" tabindex="3">
+                            <div id="spo2-hint" class="sr-only">{{ 'Enter oxygen saturation percentage' if lang == 'en' else 'أدخل نسبة تشبع الأكسجين' }}</div>
+                        </div>
+                        <div>
+                            <label for="bp-systolic" class="block text-gray-700 font-medium mb-1">
+                                {{ 'BP Systolic:' if lang == 'en' else 'ضغط الدم الانقباضي:' }}
+                                <span class="text-sm text-gray-500 font-normal">
+                                    {{ '(Normal: 90-140)' if lang == 'en' else '(طبيعي: 90-140)' }}
+                                </span>
+                            </label>
+                            <input type="number" id="bp-systolic" name="bp_systolic" 
+                                   class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                   aria-describedby="bp-systolic-hint" tabindex="4">
+                            <div id="bp-systolic-hint" class="sr-only">{{ 'Enter systolic blood pressure in mmHg' if lang == 'en' else 'أدخل ضغط الدم الانقباضي بالملليمتر زئبقي' }}</div>
+                        </div>
+                         <div>
+                            <label for="bp-diastolic" class="block text-gray-700 font-medium mb-1">
+                                {{ 'BP Diastolic:' if lang == 'en' else 'ضغط الدم الانبساطي:' }}
+                                <span class="text-sm text-gray-500 font-normal">
+                                    {{ '(Normal: 60-90)' if lang == 'en' else '(طبيعي: 60-90)' }}
+                                </span>
+                            </label>
+                            <input type="number" id="bp-diastolic" name="bp_diastolic" 
+                                   class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                   aria-describedby="bp-diastolic-hint" tabindex="5">
+                            <div id="bp-diastolic-hint" class="sr-only">{{ 'Enter diastolic blood pressure in mmHg' if lang == 'en' else 'أدخل ضغط الدم الانبساطي بالملليمتر زئبقي' }}</div>
+                        </div>
+                        <div>
+                            <label for="temperature" class="block text-gray-700 font-medium mb-1">
+                                {{ 'Temperature (°C):' if lang == 'en' else 'درجة الحرارة (°C):' }}
+                                <span class="text-sm text-gray-500 font-normal">
+                                    {{ '(Normal: 36.0-37.5)' if lang == 'en' else '(طبيعي: 36.0-37.5)' }}
+                                </span>
+                            </label>
+                            <input type="number" step="0.1" id="temperature" name="temperature" 
+                                   class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                   aria-describedby="temperature-hint" tabindex="6">
+                            <div id="temperature-hint" class="sr-only">{{ 'Enter body temperature in Celsius' if lang == 'en' else 'أدخل درجة حرارة الجسم بالمئوية' }}</div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                 <fieldset class="mb-6 border p-4 rounded-md">
+                    <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">{{ 'Level of Consciousness' if lang == 'en' else 'مستوى الوعي' }}</legend>
+                    <div class="mb-4">
+                        <label for="gcs-score" class="block text-gray-700 font-medium mb-1">
+                            {{ 'GCS Score (3-15):' if lang == 'en' else 'مقياس غلاسكو للغيبوبة (3-15):' }}
+                            <span class="text-sm text-gray-500 font-normal">
+                                {{ '(Normal: 15)' if lang == 'en' else '(طبيعي: 15)' }}
+                            </span>
+                        </label>
+                        <input type="number" id="gcs-score" name="gcs_score" min="3" max="15" 
+                               class="w-full md:w-1/2 border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                               aria-describedby="gcs-hint" tabindex="7">
+                        <div id="gcs-hint" class="sr-only">{{ 'Enter Glasgow Coma Scale score from 3 to 15' if lang == 'en' else 'أدخل درجة مقياس غلاسكو للغيبوبة من 3 إلى 15' }}</div>
+                        <p class="text-sm text-gray-500 mt-1">{{ 'Or use AVPU below:' if lang == 'en' else 'أو استخدم AVPU أدناه:' }}</p>
+                    </div>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="avpu" value="A" class="form-radio text-blue-600 h-5 w-5">
+                            <span class="{{ 'ml-2' if lang == 'en' else 'mr-2' }} text-lg">{{ 'A - Alert' if lang == 'en' else 'A - منتبه' }}</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="avpu" value="V" class="form-radio text-blue-600 h-5 w-5">
+                            <span class="{{ 'ml-2' if lang == 'en' else 'mr-2' }} text-lg">{{ 'V - Verbal' if lang == 'en' else 'V - يستجيب للكلام' }}</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="avpu" value="P" class="form-radio text-blue-600 h-5 w-5">
+                            <span class="{{ 'ml-2' if lang == 'en' else 'mr-2' }} text-lg">{{ 'P - Pain' if lang == 'en' else 'P - يستجيب للألم' }}</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="avpu" value="U" class="form-radio text-blue-600 h-5 w-5">
+                            <span class="{{ 'ml-2' if lang == 'en' else 'mr-2' }} text-lg">{{ 'U - Unresponsive' if lang == 'en' else 'U - لا يستجيب' }}</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                 <fieldset class="mb-6 border p-4 rounded-md">
+                    <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">{{ 'Pain Score' if lang == 'en' else 'مستوى الألم' }}</legend>
+                    <label for="pain-score" class="block text-gray-700 font-medium mb-1">{{ 'Rate Pain (0 = No Pain, 10 = Worst Pain Possible):' if lang == 'en' else 'حدد مستوى الألم (0 = لا يوجد ألم, 10 = أسوأ ألم ممكن):' }}</label>
+                    <input type="range" id="pain-score" name="pain_score" min="0" max="10" step="1" value="0" class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg accent-blue-600">
+                    <div class="flex justify-between text-sm text-gray-600 px-1 mt-1">
+                        <span>0</span>
+                        <span>1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        <span>4</span>
+                        <span>5</span>
+                        <span>6</span>
+                        <span>7</span>
+                        <span>8</span>
+                        <span>9</span>
+                        <span>10</span>
+                    </div>
+                     <output id="pain-score-output" class="text-center block font-medium text-lg mt-2">0</output>
+                </fieldset>
+
+                 <fieldset class="border p-4 rounded-md">
+                    <legend class="text-xl font-semibold mb-4 px-2 text-gray-700">{{ 'Other Modifiers' if lang == 'en' else 'مؤشرات أخرى' }}</legend>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div>
+                            <label for="respiratory-distress" class="block text-gray-700 font-medium mb-2">{{ 'Respiratory Distress:' if lang == 'en' else 'صعوبة التنفس:' }}</label>
+                            <select id="respiratory-distress" name="respiratory_distress" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="none">{{ 'None' if lang == 'en' else 'لا يوجد' }}</option>
+                                <option value="mild">{{ 'Mild' if lang == 'en' else 'خفيف' }}</option>
+                                <option value="moderate">{{ 'Moderate' if lang == 'en' else 'متوسط' }}</option>
+                                <option value="severe">{{ 'Severe' if lang == 'en' else 'شديد' }}</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="bleeding" class="block text-gray-700 font-medium mb-2">{{ 'Bleeding:' if lang == 'en' else 'النزيف:' }}</label>
+                            <select id="bleeding" name="bleeding" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="none">{{ 'None' if lang == 'en' else 'لا يوجد' }}</option>
+                                <option value="minor">{{ 'Minor' if lang == 'en' else 'طفيف' }}</option>
+                                <option value="moderate">{{ 'Moderate' if lang == 'en' else 'متوسط' }}</option>
+                                <option value="severe">{{ 'Severe' if lang == 'en' else 'شديد' }}</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="mechanism-injury" class="block text-gray-700 font-medium mb-2">{{ 'Mechanism of Injury:' if lang == 'en' else 'آلية الإصابة:' }}</label>
+                            <select id="mechanism-injury" name="mechanism_injury" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="none">{{ 'None/NA' if lang == 'en' else 'لا يوجد/غير مطبق' }}</option>
+                                <option value="minor">{{ 'Minor Mechanism' if lang == 'en' else 'آلية بسيطة' }}</option>
+                                <option value="significant">{{ 'Significant Mechanism' if lang == 'en' else 'آلية خطرة' }}</option>
+                                <option value="other">{{ 'Other' if lang == 'en' else 'أخرى' }}</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="glucose" class="block text-gray-700 font-medium mb-2">{{ 'Glucose:' if lang == 'en' else 'مستوى السكر:' }}</label>
+                            <input type="number" id="glucose" name="glucose" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                         <div>
+                            <label for="dehydration" class="block text-gray-700 font-medium mb-2">{{ 'Dehydration Signs:' if lang == 'en' else 'علامات الجفاف:' }}</label>
+                            <select id="dehydration" name="dehydration" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="none">{{ 'None' if lang == 'en' else 'لا يوجد' }}</option>
+                                <option value="mild">{{ 'Mild' if lang == 'en' else 'خفيف' }}</option>
+                                <option value="moderate">{{ 'Moderate' if lang == 'en' else 'متوسط' }}</option>
+                                <option value="severe">{{ 'Severe' if lang == 'en' else 'شديد' }}</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="heat-exposure" class="block text-gray-700 font-medium mb-2">{{ 'Heat Exposure:' if lang == 'en' else 'التعرض للحرارة:' }}</label>
+                            <select id="heat-exposure" name="heat_exposure" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="no">{{ 'No' if lang == 'en' else 'لا' }}</option>
+                                <option value="yes">{{ 'Yes' if lang == 'en' else 'نعم' }}</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="has-diabetes" class="block text-gray-700 font-medium mb-2">{{ 'Has Diabetes:' if lang == 'en' else 'مصاب بالسكري:' }}</label>
+                            <select id="has-diabetes" name="has_diabetes" class="w-full border border-gray-300 rounded-md p-3 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="no">{{ 'No' if lang == 'en' else 'لا' }}</option>
+                                <option value="yes">{{ 'Yes' if lang == 'en' else 'نعم' }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="is_frail" class="block text-gray-700 font-medium mb-2">{{ 'Frailty Modifier:' if lang == 'en' else 'مؤشر الضعف:' }}</label>
+                            <input type="checkbox" id="is_frail" name="is_frail" class="h-6 w-6">
+                        </div>
+                        <div>
+                            <label for="symptom_onset_time" class="block text-gray-700 font-medium mb-2">{{ 'Symptom Onset Time (hours ago):' if lang == 'en' else 'وقت بدء الأعراض (منذ كم ساعة):' }}</label>
+                            <input type="number" id="symptom_onset_time" name="symptom_onset_time" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="prevStep(3)" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            aria-label="{{ 'Go back to previous step' if lang == 'en' else 'الرجوع للخطوة السابقة' }}">
+                        {{ '←' if lang == 'en' else '→' }} {{ 'Previous' if lang == 'en' else 'السابق' }}
+                    </button>
+                    <button type="button" onclick="showSummary()" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            aria-label="{{ 'Show summary' if lang == 'en' else 'عرض الملخص' }}">
+                        {{ 'Show Summary' if lang == 'en' else 'عرض الملخص' }} {{ '→' if lang == 'en' else '←' }}
+                    </button>
+                </div>
+            </section>
+
+            <section id="step-4" class="step-section hidden-section" aria-labelledby="step-4-heading">
+                <h3 id="step-4-heading" class="text-2xl font-semibold mb-6 text-gray-700 {% if lang == 'en' %}border-l-4 pl-4{% else %}border-r-4 pr-4{% endif %} border-green-500">{{ 'Step 4: Summary and CTAS Level' if lang == 'en' else 'الخطوة 4: الملخص ومستوى الفرز (CTAS)' }}</h3>
+
+                <div id="summary-output" class="bg-gray-50 p-6 rounded-lg shadow-inner mb-8 space-y-3 text-lg">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-4">{{ 'Examination Summary' if lang == 'en' else 'ملخص الفحص' }}</h4>
+                     <p><strong>{{ 'Patient Name:' if lang == 'en' else 'اسم المريض:' }}</strong> <span id="summary-name"></span></p>
+                     <p><strong>{{ 'Age:' if lang == 'en' else 'العمر:' }}</strong> <span id="summary-age"></span></p>
+                     <p><strong>{{ 'Gender:' if lang == 'en' else 'الجنس:' }}</strong> <span id="summary-gender"></span></p>
+                     <p><strong>{{ 'ID/MRN:' if lang == 'en' else 'رقم الهوية/الملف:' }}</strong> <span id="summary-id"></span></p>
+                     <p><strong>{{ 'Chief Complaint:' if lang == 'en' else 'الشكوى الرئيسية:' }}</strong> <span id="summary-complaint"></span></p>
+                     <p><strong>{{ 'Complaint Details:' if lang == 'en' else 'تفاصيل الشكوى:' }}</strong> <span id="summary-complaint-details"></span></p>
+                     <p><strong>{{ 'Vital Signs:' if lang == 'en' else 'العلامات الحيوية:' }}</strong> <span id="summary-vitals"></span></p>
+                     <p><strong>{{ 'Level of Consciousness:' if lang == 'en' else 'مستوى الوعي:' }}</strong> <span id="summary-loc"></span></p>
+                     <p><strong>{{ 'Pain Score:' if lang == 'en' else 'مستوى الألم:' }}</strong> <span id="summary-pain"></span></p>
+                     <p><strong>{{ 'Respiratory Distress:' if lang == 'en' else 'صعوبة التنفس:' }}</strong> <span id="summary-resp-distress"></span></p>
+                     <p><strong>{{ 'Bleeding:' if lang == 'en' else 'النزيف:' }}</strong> <span id="summary-bleeding"></span></p>
+                     <p><strong>{{ 'Mechanism of Injury:' if lang == 'en' else 'آلية الإصابة:' }}</strong> <span id="summary-moi"></span></p>
+                     <p><strong>{{ 'Glucose:' if lang == 'en' else 'مستوى السكر:' }}</strong> <span id="summary-glucose"></span></p>
+                     <p><strong>{{ 'Dehydration Signs:' if lang == 'en' else 'علامات الجفاف:' }}</strong> <span id="summary-dehydration"></span></p>
+                     <hr class="my-4">
+                     <p class="text-2xl font-bold"><strong>{{ 'Initial Triage Level (CTAS Level - Preliminary):' if lang == 'en' else 'مستوى الفرز المبدئي (CTAS):' }}</strong>
+                        <span id="summary-ctas-level" class="px-3 py-1 rounded"></span>
+                     </p>
+                     <p><strong>{{ 'Estimated Wait Time:' if lang == 'en' else 'وقت الانتظار المتوقع:' }}</strong> <span id="summary-wait-time"></span></p>
+                     <p><strong>{{ 'Reassessment Interval:' if lang == 'en' else 'إعادة التقييم خلال:' }}</strong> <span id="summary-reassessment"></span></p>
+                     <p class="text-sm text-red-700 font-semibold">
+                        {% if lang == 'en' %}
+                            **Note: This level is a preliminary estimate based on input and requires clinical review and confirmation according to approved protocols.**
+                        {% else %}
+                            **تنبيه: هذا المستوى هو تقدير مبدئي بناءً على المدخلات ويحتاج لمراجعة وتأكيد إكلينيكي وفقاً للبروتوكولات المعتمدة.**
+                        {% endif %}
+                     </p>
+                </div>
+
+                <div class="mt-8 flex flex-col md:flex-row justify-between gap-4">
+                    <button type="button" onclick="prevStep(4)" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            aria-label="{{ 'Go back to previous step' if lang == 'en' else 'الرجوع للخطوة السابقة' }}">
+                        {{ '←' if lang == 'en' else '→' }} {{ 'Previous' if lang == 'en' else 'السابق' }}
+                    </button>
+                    <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                         <button type="button" onclick="preparePrint()" 
+                                 class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500"
+                                 aria-label="{{ 'Print summary' if lang == 'en' else 'طباعة الملخص' }}">
+                            {{ 'Print' if lang == 'en' else 'طباعة' }}
+                        </button>
+                        <button type="button" onclick="downloadCSV()" 
+                                class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                aria-label="{{ 'Download CSV' if lang == 'en' else 'تحميل CSV' }}">
+                            {{ 'Download CSV' if lang == 'en' else 'تحميل CSV' }}
+                        </button>
+                         <button type="button" onclick="startNew()" 
+                                 class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500"
+                                 aria-label="{{ 'Start new examination' if lang == 'en' else 'بدء فحص جديد' }}">
+                            {{ 'Start New' if lang == 'en' else 'بدء فحص جديد' }}
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </form>
+
+        <div id="print-area" class="hidden">
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/triage.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: stas-medical-triage
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -c gunicorn.conf.py app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      - key: SESSION_COOKIE_HTTPONLY
+        value: "True"
+      - key: SESSION_COOKIE_SAMESITE
+        value: "Lax"
+      - key: DEFAULT_LANGUAGE
+        value: "ar"
+      - key: SUPPORTED_LANGUAGES
+        value: "ar,en"

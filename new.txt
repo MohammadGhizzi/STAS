@@ -1,0 +1,32 @@
+# Pre-Hospital Triage System Configuration
+# نظام الفرز ما قبل المستشفى - إعدادات
+
+# Flask Configuration
+SECRET_KEY=your-secret-key-here-change-this-in-production-minimum-32-characters
+FLASK_ENV=production
+
+# Security Settings
+SESSION_COOKIE_SECURE=True
+SESSION_COOKIE_HTTPONLY=True
+SESSION_COOKIE_SAMESITE=Lax
+PERMANENT_SESSION_LIFETIME=3600
+
+# Application Settings
+DEFAULT_LANGUAGE=ar
+SUPPORTED_LANGUAGES=ar,en
+DEFAULT_THEME=light
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=8000
+WORKERS=4
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FILE=app.log
+
+# Usage Instructions:
+# 1. Copy this file to .env in production
+# 2. Change SECRET_KEY to a random 32+ character string
+# 3. Set FLASK_ENV=production for production deployment
+# 4. For development, you can set FLASK_ENV=development 

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="{{ lang or 'ar' }}" dir="{{ 'ltr' if lang == 'en' else 'rtl' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'How Are You Feeling?' if lang == 'en' else 'كيف تشعر؟' }} - {{ 'Self Check' if lang == 'en' else 'فحص ذاتي' }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .step-section {
+            display: none;
+        }
+        .step-section.active {
+            display: block;
+        }
+        /* Dark mode styles */
+        .dark {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .dark .bg-white {
+            background-color: #2d2d2d;
+        }
+        .dark .bg-gray-100 {
+            background-color: #1a1a1a;
+        }
+        .dark .bg-gray-50 {
+            background-color: #2d2d2d;
+        }
+        .dark .text-gray-900 {
+            color: #e0e0e0;
+        }
+        .dark .text-gray-700 {
+            color: #b0b0b0;
+        }
+        .dark .text-gray-600 {
+            color: #9a9a9a;
+        }
+        .dark .border-gray-300 {
+            border-color: #4a4a4a;
+        }
+        .dark input, .dark select, .dark textarea {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border-color: #4a4a4a;
+        }
+        /* Large touch-friendly buttons */
+        .symptom-button {
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            border-radius: 1rem;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .symptom-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .symptom-button.selected {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .dark .symptom-button.selected {
+            background-color: #1e3a8a;
+            color: #93c5fd;
+        }
+        /* Large readable text */
+        h1 {
+            font-size: 2rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+        }
+        @media (max-width: 640px) {
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.25rem; }
+            .question-text { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body class="{{ 'dark' if theme == 'dark' else '' }} bg-gray-100 text-gray-900 min-h-screen">
+    
+    <!-- Language and Theme Toggle -->
+    <div class="fixed top-4 {{ 'left-4' if lang == 'en' else 'right-4' }} z-50 flex gap-2">
+        <button onclick="toggleLanguage()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-150 ease-in-out">
+            <i class="fas fa-language"></i> {{ 'العربية' if lang == 'en' else 'English' }}
+        </button>
+        <button onclick="toggleTheme()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-150 ease-in-out">
+            <i class="fas {{ 'fa-sun' if theme == 'dark' else 'fa-moon' }}"></i>
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 max-w-3xl">
+        <!-- Header -->
+        <div class="bg-white shadow-lg rounded-xl p-6 mb-6 text-center">
+            <div class="mb-4">
+                <i class="fas fa-heartbeat text-4xl text-green-500 mb-2"></i>
+            </div>
+            <h1 class="font-bold text-green-600 mb-2">
+                {{ 'How Are You Feeling?' if lang == 'en' else 'كيف تشعر؟' }}
+            </h1>
+            <p class="text-gray-600 question-text">
+                {{ 'Simple health check to help you decide if you need medical care' if lang == 'en' else 'فحص صحي بسيط لمساعدتك في تحديد ما إذا كنت تحتاج رعاية طبية' }}
+            </p>
+            <div class="mt-4 text-sm">
+                <a href="/" class="text-blue-500 hover:text-blue-700 underline">
+                    {{ 'For Healthcare Workers' if lang == 'en' else 'للعاملين في المجال الطبي' }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Important Note for Healthcare Center Use -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle text-blue-500 text-2xl {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                <div>
+                    <h3 class="text-blue-800 font-bold text-lg">
+                        {{ 'Healthcare Center Assessment' if lang == 'en' else 'تقييم في المركز الصحي' }}
+                    </h3>
+                    <p class="text-blue-700">
+                        {{ 'This tool helps healthcare staff assess your condition. If you have severe symptoms, notify staff immediately.' if lang == 'en' else 'هذه الأداة تساعد الطاقم الطبي في تقييم حالتك. إذا كان لديك أعراض شديدة، أخبر الطاقم فوراً.' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form id="self-assessment-form" class="bg-white shadow-lg rounded-xl p-6">
+            
+            <!-- Step 1: Basic Info -->
+            <div id="step-1" class="step-section active">
+                <h2 class="font-bold text-gray-800 mb-6 text-center">
+                    {{ 'First, tell us about yourself' if lang == 'en' else 'أولاً، أخبرنا عن نفسك' }}
+                </h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block question-text font-medium text-gray-700 mb-3">
+                            {{ 'How old are you?' if lang == 'en' else 'كم عمرك؟' }}
+                        </label>
+                        <input type="number" name="patient_age" min="1" max="120" 
+                               class="w-full p-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block question-text font-medium text-gray-700 mb-3">
+                            {{ 'Are you male or female?' if lang == 'en' else 'هل أنت ذكر أم أنثى؟' }}
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <button type="button" class="symptom-button bg-gray-100 text-gray-700" onclick="selectGender('male')">
+                                <i class="fas fa-mars {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                                {{ 'Male' if lang == 'en' else 'ذكر' }}
+                            </button>
+                            <button type="button" class="symptom-button bg-gray-100 text-gray-700" onclick="selectGender('female')">
+                                <i class="fas fa-venus {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                                {{ 'Female' if lang == 'en' else 'أنثى' }}
+                            </button>
+                        </div>
+                        <input type="hidden" name="patient_gender" id="gender-input">
+                    </div>
+
+                    <div>
+                        <label class="block question-text font-medium text-gray-700 mb-3">
+                            {{ 'Do you have diabetes (sugar disease)?' if lang == 'en' else 'هل لديك مرض السكري؟' }}
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <button type="button" class="symptom-button bg-gray-100 text-gray-700" onclick="selectDiabetes('no')">
+                                <i class="fas fa-times-circle text-green-500 {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                                {{ 'No' if lang == 'en' else 'لا' }}
+                            </button>
+                            <button type="button" class="symptom-button bg-gray-100 text-gray-700" onclick="selectDiabetes('yes')">
+                                <i class="fas fa-check-circle text-red-500 {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                                {{ 'Yes' if lang == 'en' else 'نعم' }}
+                            </button>
+                            <button type="button" class="symptom-button bg-gray-100 text-gray-700" onclick="selectDiabetes('unsure')">
+                                <i class="fas fa-question-circle text-yellow-500 {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                                {{ 'Not sure' if lang == 'en' else 'غير متأكد' }}
+                            </button>
+                        </div>
+                        <input type="hidden" name="has_diabetes" id="diabetes-input">
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <button type="button" onclick="nextStep(1)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-xl transition duration-150 ease-in-out">
+                        {{ 'Next' if lang == 'en' else 'التالي' }} 
+                        <i class="fas fa-arrow-{{ 'right' if lang == 'en' else 'left' }} {{ 'ml-2' if lang == 'en' else 'mr-2' }}"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Main Symptoms -->
+            <div id="step-2" class="step-section">
+                <h2 class="font-bold text-gray-800 mb-6 text-center">
+                    {{ 'What is bothering you the most right now?' if lang == 'en' else 'ما الذي يضايقك أكثر شيء الآن؟' }}
+                </h2>
+                
+                <p class="text-gray-600 text-center mb-6 question-text">
+                    {{ 'Choose the ONE thing that worries you most' if lang == 'en' else 'اختر الشيء الواحد الذي يقلقك أكثر' }}
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Emergency symptoms -->
+                    <button type="button" class="symptom-button bg-red-50 text-red-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('cannot_breathe')">
+                        <i class="fas fa-lungs text-red-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Cannot breathe well' if lang == 'en' else 'لا أستطيع التنفس بشكل جيد' }}</div>
+                            <div class="text-sm">{{ 'Hard to catch my breath' if lang == 'en' else 'صعوبة في التنفس' }}</div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="symptom-button bg-red-50 text-red-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('severe_chest_pain')">
+                        <i class="fas fa-heart text-red-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Bad chest pain' if lang == 'en' else 'ألم شديد في الصدر' }}</div>
+                            <div class="text-sm">{{ 'Pain or pressure in chest' if lang == 'en' else 'ألم أو ضغط في الصدر' }}</div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="symptom-button bg-red-50 text-red-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('severe_bleeding')">
+                        <i class="fas fa-tint text-red-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Heavy bleeding' if lang == 'en' else 'نزيف كثير' }}</div>
+                            <div class="text-sm">{{ 'Bleeding that won\'t stop' if lang == 'en' else 'نزيف لا يتوقف' }}</div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="symptom-button bg-red-50 text-red-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('not_responding')">
+                        <i class="fas fa-dizzy text-red-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Feel very confused' if lang == 'en' else 'أشعر بارتباك شديد' }}</div>
+                            <div class="text-sm">{{ 'Hard to stay awake' if lang == 'en' else 'صعوبة في البقاء مستيقظاً' }}</div>
+                        </div>
+                    </button>
+
+                    <!-- Moderate symptoms -->
+                    <button type="button" class="symptom-button bg-orange-50 text-orange-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('fever_very_high')">
+                        <i class="fas fa-thermometer-three-quarters text-orange-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Very high fever' if lang == 'en' else 'حمى عالية جداً' }}</div>
+                            <div class="text-sm">{{ 'Feel very hot and sick' if lang == 'en' else 'أشعر بحرارة شديدة ومرض' }}</div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="symptom-button bg-orange-50 text-orange-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('severe_abdominal_pain')">
+                        <i class="fas fa-stomach text-orange-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Bad stomach pain' if lang == 'en' else 'ألم شديد في البطن' }}</div>
+                            <div class="text-sm">{{ 'Severe belly pain' if lang == 'en' else 'ألم شديد في المعدة' }}</div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="symptom-button bg-orange-50 text-orange-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('severe_headache')">
+                        <i class="fas fa-brain text-orange-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Very bad headache' if lang == 'en' else 'صداع شديد جداً' }}</div>
+                            <div class="text-sm">{{ 'Worst headache ever' if lang == 'en' else 'أسوأ صداع في حياتي' }}</div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="symptom-button bg-orange-50 text-orange-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('moderate_bleeding')">
+                        <i class="fas fa-band-aid text-orange-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Some bleeding' if lang == 'en' else 'نزيف متوسط' }}</div>
+                            <div class="text-sm">{{ 'Bleeding needs pressure' if lang == 'en' else 'نزيف يحتاج ضغط' }}</div>
+                        </div>
+                    </button>
+
+                    <!-- Mild symptoms -->
+                    <button type="button" class="symptom-button bg-yellow-50 text-yellow-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('moderate_pain')">
+                        <i class="fas fa-hand-paper text-yellow-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Medium pain' if lang == 'en' else 'ألم متوسط' }}</div>
+                            <div class="text-sm">{{ 'Hurts but manageable' if lang == 'en' else 'يؤلم لكن يمكن تحمله' }}</div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="symptom-button bg-yellow-50 text-yellow-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('fever_mild_moderate')">
+                        <i class="fas fa-thermometer-half text-yellow-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Mild fever' if lang == 'en' else 'حمى خفيفة' }}</div>
+                            <div class="text-sm">{{ 'Feel warm and tired' if lang == 'en' else 'أشعر بدفء وتعب' }}</div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="symptom-button bg-yellow-50 text-yellow-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('vomiting_diarrhea')">
+                        <i class="fas fa-toilet text-yellow-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Nausea or diarrhea' if lang == 'en' else 'غثيان أو إسهال' }}</div>
+                            <div class="text-sm">{{ 'Upset stomach' if lang == 'en' else 'اضطراب في المعدة' }}</div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="symptom-button bg-green-50 text-green-700 text-{{ 'left' if lang == 'en' else 'right' }}" onclick="selectSymptom('mild_pain_symptoms')">
+                        <i class="fas fa-smile text-green-500 {{ 'mr-3' if lang == 'en' else 'ml-3' }}"></i>
+                        <div>
+                            <div class="font-bold">{{ 'Minor problem' if lang == 'en' else 'مشكلة بسيطة' }}</div>
+                            <div class="text-sm">{{ 'Small pain or discomfort' if lang == 'en' else 'ألم أو انزعاج بسيط' }}</div>
+                        </div>
+                    </button>
+                </div>
+
+                <input type="hidden" name="main_symptom" id="symptom-input">
+
+                <div class="flex justify-between mt-8">
+                    <button type="button" onclick="prevStep(2)" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg">
+                        <i class="fas fa-arrow-{{ 'left' if lang == 'en' else 'right' }} {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                        {{ 'Back' if lang == 'en' else 'رجوع' }}
+                    </button>
+                    <button type="button" onclick="nextStep(2)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
+                        {{ 'Continue' if lang == 'en' else 'متابعة' }}
+                        <i class="fas fa-arrow-{{ 'right' if lang == 'en' else 'left' }} {{ 'ml-2' if lang == 'en' else 'mr-2' }}"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Additional Questions -->
+            <div id="step-3" class="step-section">
+                <h2 class="font-bold text-gray-800 mb-6 text-center">
+                    {{ 'A few more questions' if lang == 'en' else 'بعض الأسئلة الإضافية' }}
+                </h2>
+
+                <div class="space-y-8">
+                    <!-- Alertness -->
+                    <div>
+                        <label class="block question-text font-medium text-gray-700 mb-4">
+                            {{ 'How do you feel right now?' if lang == 'en' else 'كيف تشعر الآن؟' }}
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <button type="button" class="symptom-button bg-green-100 text-green-700" onclick="selectAlertness('A')">
+                                <i class="fas fa-smile text-green-500 {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                                {{ 'Normal and awake' if lang == 'en' else 'طبيعي ومستيقظ' }}
+                            </button>
+                            <button type="button" class="symptom-button bg-yellow-100 text-yellow-700" onclick="selectAlertness('V')">
+                                <i class="fas fa-meh text-yellow-500 {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                                {{ 'A bit sleepy or confused' if lang == 'en' else 'نعسان قليلاً أو مرتبك' }}
+                            </button>
+                            <button type="button" class="symptom-button bg-orange-100 text-orange-700" onclick="selectAlertness('P')">
+                                <i class="fas fa-frown text-orange-500 {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                                {{ 'Very confused' if lang == 'en' else 'مرتبك جداً' }}
+                            </button>
+                            <button type="button" class="symptom-button bg-red-100 text-red-700" onclick="selectAlertness('U')">
+                                <i class="fas fa-dizzy text-red-500 {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                                {{ 'Cannot stay awake' if lang == 'en' else 'لا أستطيع البقاء مستيقظاً' }}
+                            </button>
+                        </div>
+                        <input type="hidden" name="alertness" id="alertness-input">
+                    </div>
+
+                    <!-- Pain Scale -->
+                    <div>
+                        <label class="block question-text font-medium text-gray-700 mb-4">
+                            {{ 'How much pain do you have? (0 = no pain, 10 = worst pain ever)' if lang == 'en' else 'كم مقدار الألم؟ (0 = لا يوجد ألم، 10 = أسوأ ألم في الحياة)' }}
+                        </label>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-green-600 font-bold">0</span>
+                            <input type="range" name="pain_score" min="0" max="10" value="0" 
+                                   class="flex-1 h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                   oninput="updatePainDisplay(this.value)">
+                            <span class="text-red-600 font-bold">10</span>
+                        </div>
+                        <div class="text-center mt-2">
+                            <span class="text-2xl font-bold text-blue-600" id="pain-display">0</span>
+                            <p class="text-sm text-gray-600">
+                                {{ 'Current pain level' if lang == 'en' else 'مستوى الألم الحالي' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Diabetes glucose check -->
+                    <div id="glucose-section" style="display: none;">
+                        <label class="block question-text font-medium text-gray-700 mb-4">
+                            {{ 'What was your last blood sugar reading?' if lang == 'en' else 'ما كان آخر قياس للسكر في الدم؟' }}
+                        </label>
+                        <input type="number" name="glucose" step="0.1" min="0" max="50"
+                               placeholder="{{ '7.0' if lang == 'en' else '7.0' }}"
+                               class="w-full p-3 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <p class="text-sm text-gray-600 mt-2">
+                            {{ 'Normal range: 4.0-7.0 mmol/L' if lang == 'en' else 'المعدل الطبيعي: 4.0-7.0 ملمول/لتر' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button type="button" onclick="prevStep(3)" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg">
+                        <i class="fas fa-arrow-{{ 'left' if lang == 'en' else 'right' }} {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                        {{ 'Back' if lang == 'en' else 'رجوع' }}
+                    </button>
+                    <button type="button" onclick="calculateAssessment()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-xl">
+                        <i class="fas fa-check-circle {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                        {{ 'Get My Results' if lang == 'en' else 'احصل على النتائج' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-section" class="step-section">
+                <h2 class="font-bold text-gray-800 mb-6 text-center">
+                    {{ 'Your Health Assessment Results' if lang == 'en' else 'نتائج التقييم الصحي' }}
+                </h2>
+                
+                <div id="results-content">
+                    <!-- Results will be loaded here -->
+                </div>
+
+                <div class="text-center mt-8 space-y-4">
+                    <button type="button" onclick="downloadResults()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
+                        <i class="fas fa-download {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                        {{ 'Download Results' if lang == 'en' else 'تحميل النتائج' }}
+                    </button>
+                    <button type="button" onclick="startOver()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg">
+                        <i class="fas fa-redo {{ 'mr-2' if lang == 'en' else 'ml-2' }}"></i>
+                        {{ 'Start Over' if lang == 'en' else 'ابدأ من جديد' }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentLang = '{{ lang or "ar" }}';
+        let currentTheme = '{{ theme or "light" }}';
+        let currentStep = 1;
+
+        // Language Toggle
+        function toggleLanguage() {
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            
+            fetch('/set_language', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ language: newLang })
+            }).then(() => {
+                window.location.reload();
+            });
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            fetch('/set_theme', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ theme: newTheme })
+            }).then(() => {
+                window.location.reload();
+            });
+        }
+
+        // Step Navigation
+        function nextStep(step) {
+            if (validateStep(step)) {
+                document.getElementById(`step-${step}`).classList.remove('active');
+                currentStep = step + 1;
+                document.getElementById(`step-${currentStep}`).classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step-${step}`).classList.remove('active');
+            currentStep = step - 1;
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateStep(step) {
+            if (step === 1) {
+                const age = document.querySelector('input[name="patient_age"]').value;
+                const gender = document.querySelector('input[name="patient_gender"]').value;
+                const diabetes = document.querySelector('input[name="has_diabetes"]').value;
+                
+                if (!age || !gender || !diabetes) {
+                    alert(currentLang === 'ar' ? 'يرجى الإجابة على جميع الأسئلة' : 'Please answer all questions');
+                    return false;
+                }
+            } else if (step === 2) {
+                const symptom = document.querySelector('input[name="main_symptom"]').value;
+                if (!symptom) {
+                    alert(currentLang === 'ar' ? 'يرجى اختيار العرض الأهم' : 'Please choose your main symptom');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Selection Functions
+        function selectGender(value) {
+            document.querySelectorAll('#step-1 .symptom-button').forEach(btn => {
+                if (btn.onclick.toString().includes('selectGender')) {
+                    btn.classList.remove('selected');
+                }
+            });
+            event.target.closest('.symptom-button').classList.add('selected');
+            document.getElementById('gender-input').value = value;
+        }
+
+        function selectDiabetes(value) {
+            document.querySelectorAll('#step-1 .symptom-button').forEach(btn => {
+                if (btn.onclick.toString().includes('selectDiabetes')) {
+                    btn.classList.remove('selected');
+                }
+            });
+            event.target.closest('.symptom-button').classList.add('selected');
+            document.getElementById('diabetes-input').value = value;
+            
+            // Show glucose section if diabetic
+            const glucoseSection = document.getElementById('glucose-section');
+            if (value === 'yes') {
+                glucoseSection.style.display = 'block';
+            } else {
+                glucoseSection.style.display = 'none';
+            }
+        }
+
+        function selectSymptom(value) {
+            document.querySelectorAll('#step-2 .symptom-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.closest('.symptom-button').classList.add('selected');
+            document.getElementById('symptom-input').value = value;
+        }
+
+        function selectAlertness(value) {
+            document.querySelectorAll('#step-3 .symptom-button').forEach(btn => {
+                if (btn.onclick.toString().includes('selectAlertness')) {
+                    btn.classList.remove('selected');
+                }
+            });
+            event.target.closest('.symptom-button').classList.add('selected');
+            document.getElementById('alertness-input').value = value;
+        }
+
+        function updatePainDisplay(value) {
+            document.getElementById('pain-display').textContent = value;
+        }
+
+        // Calculate Assessment
+        function calculateAssessment() {
+            if (!validateStep(3)) return;
+
+            const formData = new FormData(document.getElementById('self-assessment-form'));
+            
+            fetch('/calculate_self_assessment', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data);
+                document.getElementById('step-3').classList.remove('active');
+                document.getElementById('results-section').classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(currentLang === 'ar' ? 'حدث خطأ في حساب النتائج' : 'Error calculating results');
+            });
+        }
+
+        function displayResults(data) {
+            const resultsContent = document.getElementById('results-content');
+            const levelColors = {
+                1: 'bg-red-100 border-red-500 text-red-800',
+                2: 'bg-orange-100 border-orange-500 text-orange-800',
+                3: 'bg-yellow-100 border-yellow-500 text-yellow-800',
+                4: 'bg-green-100 border-green-500 text-green-800',
+                5: 'bg-blue-100 border-blue-500 text-blue-800'
+            };
+
+            resultsContent.innerHTML = `
+                <div class="border-l-4 ${levelColors[data.level]} p-6 rounded-lg mb-6">
+                    <h3 class="text-2xl font-bold mb-4">
+                        ${currentLang === 'ar' ? `المستوى ${data.level}` : `Level ${data.level}`}
+                    </h3>
+                    ${data.recommendation}
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-bold mb-4">
+                        ${currentLang === 'ar' ? 'ملخص المعلومات' : 'Summary'}
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div><strong>${currentLang === 'ar' ? 'العمر' : 'Age'}:</strong> ${data.age}</div>
+                        <div><strong>${currentLang === 'ar' ? 'الجنس' : 'Gender'}:</strong> ${data.gender}</div>
+                        <div><strong>${currentLang === 'ar' ? 'العرض الرئيسي' : 'Main Symptom'}:</strong> ${data.main_symptom}</div>
+                        <div><strong>${currentLang === 'ar' ? 'مستوى الألم' : 'Pain Level'}:</strong> ${data.pain}/10</div>
+                        <div><strong>${currentLang === 'ar' ? 'مستوى الوعي' : 'Alertness'}:</strong> ${data.alertness}</div>
+                        <div><strong>${currentLang === 'ar' ? 'مرض السكري' : 'Diabetes'}:</strong> ${data.diabetes}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function downloadResults() {
+            const formData = new FormData(document.getElementById('self-assessment-form'));
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/download_self_assessment_csv';
+            form.style.display = 'none';
+            
+            for (let [key, value] of formData.entries()) {
+                const input = document.createElement('input');
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+
+        function startOver() {
+            if (confirm(currentLang === 'ar' ? 'هل تريد البدء من جديد؟' : 'Do you want to start over?')) {
+                window.location.reload();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            currentStep = 1;
+            document.getElementById('step-1').classList.add('active');
+        });
+    </script>
+</body>
+</html> 
